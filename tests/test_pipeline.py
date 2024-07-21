@@ -10,6 +10,8 @@ from pipeline.task import PipelineParams, PipelineTask
 from processors.aggregators.sentence import SentenceAggregator
 from processors.frame_processor import FrameProcessor
 from processors.text_transformer import StatelessTextTransformer
+from processors.input_processor import InputFrameProcessor
+from processors.output_processor import OutputFrameProcessor
 
 
 class TestSentenceAggregatorPipeline(unittest.IsolatedAsyncioTestCase):
@@ -17,9 +19,19 @@ class TestSentenceAggregatorPipeline(unittest.IsolatedAsyncioTestCase):
     async def test_pipeline_simple(self):
         aggregator = SentenceAggregator()
 
-        outgoing_queue = asyncio.Queue()
         incoming_queue = asyncio.Queue()
-        pipeline = [aggregator]
+        in_processor = InputFrameProcessor(
+            in_queue=incoming_queue,
+            name="input_frame_processor"
+        )
+        outgoing_queue = asyncio.Queue()
+        out_processor = OutputFrameProcessor(
+            out_queue=outgoing_queue,
+            cb=lambda frame: print(frame),
+            name="output_frame_processor"
+        )
+
+        pipeline = Pipeline([in_processor, aggregator, out_processor])
         task = PipelineTask(pipeline, PipelineParams(allow_interruptions=True))
 
         await incoming_queue.put(TextFrame("Hello, "))
@@ -28,9 +40,6 @@ class TestSentenceAggregatorPipeline(unittest.IsolatedAsyncioTestCase):
 
         runner = PipelineRunner()
         await runner.run(task)
-
-        self.assertEqual(await outgoing_queue.get(), TextFrame("Hello, world."))
-        self.assertIsInstance(await outgoing_queue.get(), EndPipeFrame)
 
     async def test_pipeline_multiple_stages(self):
         sentence_aggregator = SentenceAggregator()

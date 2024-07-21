@@ -1,5 +1,11 @@
+import logging
 from typing import List
+
+from frames.data_frames import DataFrame
+from frames.sys_frames import StartFrame
 from processors.frame_processor import FrameProcessor
+from processors.input_processor import InputProcessor
+from processors.output_processor import OutputProcessor
 
 
 class TestException(BaseException):
@@ -41,3 +47,22 @@ class TestFrameProcessor(FrameProcessor):
                 raise TestException(f"Expected {self.test_frames[0]}, but got {frame}")
             print(f"TestFrameProcessor got expected frame: {frame}")
             self.test_frames.pop(0)
+
+
+class TestInputPorcessor(InputProcessor):
+    async def start(self, frame: StartFrame):
+        logging.debug(f"start input frame: {frame}")
+
+    async def stop(self):
+        logging.debug(f"stop input frame")
+
+
+class TestOutputPorcessor(OutputProcessor):
+    async def start(self, frame: StartFrame):
+        logging.debug(f"start output frame: {frame}")
+
+    async def stop(self):
+        logging.debug(f"stop output frame")
+
+    async def sink(self, frame: DataFrame):
+        logging.debug(f"sink data frame")

@@ -12,13 +12,32 @@ from processors.frame_processor import FrameDirection
 
 class OutputProcessor(AsyncFrameProcessor, ABC):
 
-    @abstractmethod
-    async def start(self, frame: StartFrame):
-        raise NotImplementedError
+    def __init__(
+            self,
+            *,
+            name: str | None = None,
+            loop: asyncio.AbstractEventLoop | None = None,
+            **kwargs):
+        super().__init__(name=name, loop=loop, **kwargs)
 
-    @abstractmethod
+        self._stopped_event = asyncio.Event()
+
+        # Create sink frame task. This is the task that will actually write
+        # audio or video frames. We write audio/video in a task so we can keep
+        # generating frames upstream while, for example, the audio is playing.
+        self._create_sink_task()
+
+    async def start(self, frame: StartFrame):
+        if self._sink_task.cancelled():
+            self._create_sink_task()
+
     async def stop(self):
-        raise NotImplementedError
+        self._stopped_event.set()
+
+    async def cleanup(self):
+        self._sink_task.cancel()
+        await self._sink_task
+        await super().cleanup()
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
         await super().process_frame(frame, direction)
@@ -43,8 +62,6 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
             await self.push_frame(frame, direction)
         elif isinstance(frame, SystemFrame):
             await self.push_frame(frame, direction)
-        elif isinstance(frame, AudioRawFrame):
-            await self._handle_audio(frame)
         else:
             await self._sink_queue.put(frame)
 
@@ -54,17 +71,33 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         if isinstance(frame, CancelFrame) or isinstance(frame, EndPipeFrame):
             await self._stopped_event.wait()
 
+    async def send_metrics(self, frame: MetricsFrame):
+        pass
+
+    async def _handle_interruptions(self, frame: Frame):
+        if not self.interruptions_allowed():
+            return
+
+        if isinstance(frame, StartInterruptionFrame):
+            # Stop sink task.
+            self._sink_task.cancel()
+            await self._sink_task
+            self._create_sink_task()
+            # Stop push task.
+            self._push_frame_task.cancel()
+            await self._push_frame_task
+            self._create_push_task()
+
     #
     # sink frames task
     #
+
     def _create_sink_task(self):
         loop = self.get_event_loop()
         self._sink_queue = asyncio.Queue()
         self._sink_task = loop.create_task(self._sink_task_handler())
 
     async def _sink_task_handler(self):
-        # Audio accumlation buffer
-        buffer = bytearray()
         while True:
             try:
                 frame = await self._sink_queue.get()
@@ -86,3 +119,46 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
     async def sink(self, frame: DataFrame):
         #  Multimoding(text,audio,image) Sink
         raise NotImplementedError
+
+
+class OutputFrameProcessor(OutputProcessor):
+    """
+    sink data frames to asyncio.Queue
+    (Note!!!: need  start custom coroutine to run  if use this class)
+    """
+
+    def __init__(self, *, out_queue: asyncio.Queue, cb, name: str | None = None,
+                 loop: asyncio.AbstractEventLoop | None = None, **kwargs):
+        super().__init__(name=name, loop=loop, **kwargs)
+        self._out_queue = out_queue
+        self._cb = cb
+        self._create_output_task()
+
+    async def sink(self, frame: DataFrame):
+        await self._out_queue.put(frame)
+
+    def _create_output_task(self):
+        self._out_task = self.get_event_loop().create_task(self._out_push_task_handler())
+
+    async def _out_push_task_handler(self):
+        running = True
+        while running:
+            try:
+                frame = await self._out_queue.get()
+                self._cb(frame)
+                running = not isinstance(frame, EndPipeFrame)
+            except asyncio.CancelledError:
+                break
+
+    async def start(self, frame: Frame):
+        if self._out_task is not None and self._out_task.cancelled:
+            self._create_output_task()
+
+    async def stop(self):
+        if self._out_task is not None and self._out_task and not self._out_task.cancelled:
+            self._out_task.cancel()
+            await self._out_task
+
+    async def cleanup(self):
+        await self.stop()
+        super().cleanup()

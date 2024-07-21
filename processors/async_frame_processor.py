@@ -21,6 +21,8 @@ class AsyncFrameProcessor(FrameProcessor):
             **kwargs):
         super().__init__(name=name, loop=loop, **kwargs)
 
+        # Create push frame task. This is the task that will push frames in
+        # order. We also guarantee that all frames are pushed in the same task.
         self._create_push_task()
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
