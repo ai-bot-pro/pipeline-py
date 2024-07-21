@@ -1,0 +1,39 @@
+/*
+  python -m grpc_tools.protoc \
+    --proto_path=./ \
+    --python_out=./protobufs \
+    data_frames.proto
+*/
+
+syntax = "proto3";
+
+package pipeline_frames;
+
+message TextFrame {
+  uint64 id = 1;
+  string name = 2;
+  string text = 3;
+}
+
+message AudioRawFrame {
+  uint64 id = 1;
+  string name = 2;
+  bytes audio = 3;
+  uint32 sample_rate = 4;
+  uint32 num_channels = 5;
+}
+
+message ImageRawFrame {
+  bytes data = 1;
+  uint32 width = 2;
+  uint32 hight = 3;
+  string format = 4;
+}
+
+message Frame {
+  oneof frame {
+    TextFrame text = 1;
+    AudioRawFrame audio = 2;
+    ImageRawFrame image = 3;
+  }
+}
