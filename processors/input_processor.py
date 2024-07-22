@@ -1,5 +1,3 @@
-
-from abc import ABC, abstractmethod
 import asyncio
 
 from frames.base import Frame
@@ -9,18 +7,16 @@ from processors.async_frame_processor import AsyncFrameProcessor
 from processors.frame_processor import FrameDirection
 
 
-class InputProcessor(AsyncFrameProcessor, ABC):
+class InputProcessor(AsyncFrameProcessor):
     """
     base inpurt processor
     """
 
-    @abstractmethod
     async def start(self, frame: StartFrame):
-        raise NotImplementedError
+        pass
 
-    @abstractmethod
     async def stop(self):
-        raise NotImplementedError
+        pass
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
         await super().process_frame(frame, direction)
@@ -43,6 +39,8 @@ class InputFrameProcessor(InputProcessor):
     """
     consume input asyncio.Queue, push to next processor;
     if input queue is None, use queue_frame method to push frame to next processor with direction
+
+    WARNNING: dont to use it if use pipeline task, just use pipeline task queue_frame to input frame
     """
 
     def __init__(self, *, in_queue: asyncio.Queue | None = None, name: str | None = None,
@@ -60,7 +58,6 @@ class InputFrameProcessor(InputProcessor):
         while running:
             try:
                 frame = await self._in_queue.get()
-                print(frame)
                 await self.push_frame(frame)
                 running = not isinstance(frame, EndPipeFrame)
             except asyncio.CancelledError:

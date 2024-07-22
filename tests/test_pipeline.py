@@ -3,7 +3,7 @@ import asyncio
 import unittest
 
 from frames.control_frames import EndPipeFrame
-from frames.data_frames import TextFrame
+from frames.data_frames import DataFrame, TextFrame
 from pipeline.pipeline import Pipeline
 from pipeline.runner import PipelineRunner
 from pipeline.task import PipelineParams, PipelineTask
@@ -14,32 +14,33 @@ from processors.input_processor import InputFrameProcessor
 from processors.output_processor import OutputFrameProcessor
 
 
+"""
+python -m unittest  tests.test_pipeline.TestSentenceAggregatorPipeline.test_pipeline_simple
+"""
+
+
 class TestSentenceAggregatorPipeline(unittest.IsolatedAsyncioTestCase):
 
     async def test_pipeline_simple(self):
         aggregator = SentenceAggregator()
 
-        incoming_queue = asyncio.Queue()
-        in_processor = InputFrameProcessor(
-            in_queue=incoming_queue,
-            name="input_frame_processor"
-        )
-        outgoing_queue = asyncio.Queue()
-        out_processor = OutputFrameProcessor(
-            out_queue=outgoing_queue,
-            cb=lambda frame: print(frame),
-            name="output_frame_processor"
-        )
+        def sink_callback(frame: DataFrame):
+            print(f"sink_callback print frame: {frame}")
+            # note: if assert false, wait for a while
+            self.assertEqual(frame.text, 'Hello, world.')
+        out_processor = OutputFrameProcessor(cb=sink_callback)
+        # out_processor = OutputFrameProcessor(cb=lambda x: print(f"sink_callback print frame: {x}"))
 
-        pipeline = Pipeline([in_processor, aggregator, out_processor])
+        pipeline = Pipeline([aggregator, out_processor])
         task = PipelineTask(pipeline, PipelineParams(allow_interruptions=True))
 
-        await incoming_queue.put(TextFrame("Hello, "))
-        await incoming_queue.put(TextFrame("world."))
-        await incoming_queue.put(EndPipeFrame())
+        await task.queue_frame(TextFrame("Hello, "))
+        await task.queue_frame(TextFrame("world."))
+        await task.queue_frame(EndPipeFrame())
 
         runner = PipelineRunner()
-        await runner.run(task)
+
+        await asyncio.gather(runner.run(task))
 
     async def test_pipeline_multiple_stages(self):
         sentence_aggregator = SentenceAggregator()

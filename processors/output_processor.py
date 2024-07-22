@@ -21,6 +21,7 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         super().__init__(name=name, loop=loop, **kwargs)
 
         self._stopped_event = asyncio.Event()
+        self._sink_event = asyncio.Event()
 
         # Create sink frame task. This is the task that will actually write
         # audio or video frames. We write audio/video in a task so we can keep
@@ -105,6 +106,8 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
                     await self.sink(frame)
                 else:
                     await self.queue_frame(frame)
+                # if sink is async put to queue, need wait sink task done
+                await self._sink_event.wait()
 
                 if isinstance(frame, EndPipeFrame):
                     await self.stop()
@@ -117,20 +120,21 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
 
     @abstractmethod
     async def sink(self, frame: DataFrame):
-        #  Multimoding(text,audio,image) Sink
+        """
+        Multimoding(text,audio,image) Sink, use _sink_event to set
+        """
         raise NotImplementedError
 
 
 class OutputFrameProcessor(OutputProcessor):
     """
     sink data frames to asyncio.Queue
-    (Note!!!: need  start custom coroutine to run  if use this class)
     """
 
-    def __init__(self, *, out_queue: asyncio.Queue, cb, name: str | None = None,
+    def __init__(self, *, cb, name: str | None = None,
                  loop: asyncio.AbstractEventLoop | None = None, **kwargs):
         super().__init__(name=name, loop=loop, **kwargs)
-        self._out_queue = out_queue
+        self._out_queue = asyncio.Queue()
         self._cb = cb
         self._create_output_task()
 
@@ -145,20 +149,25 @@ class OutputFrameProcessor(OutputProcessor):
         while running:
             try:
                 frame = await self._out_queue.get()
-                self._cb(frame)
-                running = not isinstance(frame, EndPipeFrame)
+                if asyncio.iscoroutinefunction(self._cb):
+                    await self._cb(frame)
+                else:
+                    self._cb(frame)
+                self._sink_event.set()
             except asyncio.CancelledError:
                 break
 
     async def start(self, frame: Frame):
-        if self._out_task is not None and self._out_task.cancelled:
+        if self._out_task is not None and self._out_task.cancelled():
             self._create_output_task()
 
     async def stop(self):
-        if self._out_task is not None and self._out_task and not self._out_task.cancelled:
+        if self._out_task and self._out_task.cancelled() is False:
             self._out_task.cancel()
             await self._out_task
+            self._out_task = None
+        await super().stop()
 
     async def cleanup(self):
         await self.stop()
-        super().cleanup()
+        await super().cleanup()
