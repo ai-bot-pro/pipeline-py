@@ -2,7 +2,7 @@
 
 - 每个processor只负责对应的frame数据
 - 每个processor会启动一个异步队列和异步协程进行消费，提供外部接口queue_frame输入frame数据
-- 异步协程获取到输入的数据后，通过上游还是下游方向通过push_frame进行下一步的处理输出
+- 异步协程获取到输入的数据后，根据上游还是下游方向通过push_frame进行下一步的处理输出
 
 - pipeline输入frame请使用PipelineTask.queue_frame进行输入，不要直接使用自定义的输入queue进行输入
-- pipeline输出frame请实现sink的接口
+- pipeline输出frame请实现OutputProcessor中的sink方法，如果直接从sink队列中获取，可以使用OutputFrameProcessor这个类，通过callback获取数据进行处理
