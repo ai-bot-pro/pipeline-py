@@ -1,3 +1,4 @@
+import logging
 import asyncio
 
 import unittest
@@ -15,19 +16,37 @@ from processors.output_processor import OutputFrameProcessor
 
 
 """
-python -m unittest  tests.test_pipeline.TestSentenceAggregatorPipeline.test_pipeline_simple
+python -m unittest tests.test_pipeline.TestSentenceAggregatorPipeline.test_pipeline_simple
+python -m unittest tests.test_pipeline.TestSentenceAggregatorPipeline.test_pipeline_multiple_stages
 """
 
 
 class TestSentenceAggregatorPipeline(unittest.IsolatedAsyncioTestCase):
+    @classmethod
+    def setUpClass(cls):
+        logging.basicConfig(level=logging.DEBUG)
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    async def asyncSetUp(self):
+        pass
+
+    async def asyncTearDown(self):
+        pass
 
     async def test_pipeline_simple(self):
         aggregator = SentenceAggregator()
 
-        def sink_callback(frame: DataFrame):
+        self.text = []
+
+        async def sink_callback(frame: DataFrame):
             print(f"sink_callback print frame: {frame}")
+            self.text.append(frame.text)
             # note: if assert false, wait for a while
-            self.assertEqual(frame.text, 'Hello, world.')
+            # self.assertEqual(frame.text, 'Hello, world.')
         out_processor = OutputFrameProcessor(cb=sink_callback)
         # out_processor = OutputFrameProcessor(cb=lambda x: print(f"sink_callback print frame: {x}"))
 
@@ -36,42 +55,49 @@ class TestSentenceAggregatorPipeline(unittest.IsolatedAsyncioTestCase):
 
         await task.queue_frame(TextFrame("Hello, "))
         await task.queue_frame(TextFrame("world."))
+        await task.queue_frame(TextFrame("hi"))
+        await task.queue_frame(EndPipeFrame())
+
+        runner = PipelineRunner()
+
+        await asyncio.gather(runner.run(task))
+        self.assertEqual(self.text, ["Hello, world.", "hi"])
+
+    async def test_pipeline_multiple_stages(self):
+        sentence_aggregator = SentenceAggregator()
+
+        def to_upper(x: str):
+            return x.upper()
+        to_upper_processor = StatelessTextTransformer(to_upper)
+        add_space_processor = StatelessTextTransformer(lambda x: x + " ")
+
+        self.text = []
+
+        async def sink_callback(frame: DataFrame):
+            print(f"sink_callback print frame: {frame}")
+            self.text.append(frame.text)
+        out_processor = OutputFrameProcessor(cb=sink_callback)
+
+        pipeline = Pipeline([
+            add_space_processor,
+            sentence_aggregator,
+            to_upper_processor,
+            out_processor,
+        ])
+        task = PipelineTask(pipeline, PipelineParams(allow_interruptions=True))
+
+        sentence = "Hello, world. It's me, a pipeline."
+        for c in sentence:
+            await task.queue_frame(TextFrame(c))
         await task.queue_frame(EndPipeFrame())
 
         runner = PipelineRunner()
 
         await asyncio.gather(runner.run(task))
 
-    async def test_pipeline_multiple_stages(self):
-        sentence_aggregator = SentenceAggregator()
-        to_upper = StatelessTextTransformer(lambda x: x.upper())
-        add_space = StatelessTextTransformer(lambda x: x + " ")
-
-        outgoing_queue = asyncio.Queue()
-        incoming_queue = asyncio.Queue()
-        pipeline = Pipeline(
-            [add_space, sentence_aggregator, to_upper],
-            incoming_queue,
-            outgoing_queue
-        )
-
-        sentence = "Hello, world. It's me, a pipeline."
-        for c in sentence:
-            await incoming_queue.put(TextFrame(c))
-        await incoming_queue.put(EndPipeFrame())
-
-        await pipeline.run_pipeline()
-
-        self.assertEqual(
-            await outgoing_queue.get(), TextFrame("H E L L O ,   W O R L D .")
-        )
-        self.assertEqual(
-            await outgoing_queue.get(),
-            TextFrame("   I T ' S   M E ,   A   P I P E L I N E ."),
-        )
-        # leftover little bit because of the spacing
-        self.assertEqual(
-            await outgoing_queue.get(),
-            TextFrame(" "),
-        )
-        self.assertIsInstance(await outgoing_queue.get(), EndPipeFrame)
+        print(self.text)
+        self.assertEqual(self.text, [
+            "H E L L O ,   W O R L D .",
+            "   I T ' S   M E ,   A   P I P E L I N E .",
+            " ",
+        ])

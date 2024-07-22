@@ -102,12 +102,14 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         while True:
             try:
                 frame = await self._sink_queue.get()
+                # print(f"_sink_queue.get: {frame}")
                 if isinstance(frame, DataFrame):
                     await self.sink(frame)
+                    # if sink is async put to queue, need wait sink task done
+                    await self._sink_event.wait()
+                    self._sink_event.clear()
                 else:
                     await self.queue_frame(frame)
-                # if sink is async put to queue, need wait sink task done
-                await self._sink_event.wait()
 
                 if isinstance(frame, EndPipeFrame):
                     await self.stop()
@@ -129,14 +131,29 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
 class OutputFrameProcessor(OutputProcessor):
     """
     sink data frames to asyncio.Queue
+    if have callback, use out push task handler to consume the queue ;
+    else user can get the out_queue to consume;
     """
 
-    def __init__(self, *, cb, name: str | None = None,
+    def __init__(self, *, cb=None, name: str | None = None,
                  loop: asyncio.AbstractEventLoop | None = None, **kwargs):
         super().__init__(name=name, loop=loop, **kwargs)
         self._out_queue = asyncio.Queue()
         self._cb = cb
-        self._create_output_task()
+        self._out_task = None
+        if self._cb:
+            self._create_output_task()
+
+    @property
+    def out_queue(self):
+        if self._cb:
+            return None
+        return self._out_queue
+
+    def set_sink_event(self):
+        if self._cb:
+            return
+        self._sink_event.set()
 
     async def sink(self, frame: DataFrame):
         await self._out_queue.put(frame)
@@ -149,6 +166,7 @@ class OutputFrameProcessor(OutputProcessor):
         while running:
             try:
                 frame = await self._out_queue.get()
+                # print(f"_out_queue.get: {frame}")
                 if asyncio.iscoroutinefunction(self._cb):
                     await self._cb(frame)
                 else:
@@ -158,7 +176,7 @@ class OutputFrameProcessor(OutputProcessor):
                 break
 
     async def start(self, frame: Frame):
-        if self._out_task is not None and self._out_task.cancelled():
+        if self._out_task is None or self._out_task.cancelled():
             self._create_output_task()
 
     async def stop(self):

@@ -59,9 +59,11 @@ class TestInputPorcessor(InputProcessor):
 
 class TestOutputPorcessor(OutputProcessor):
     async def start(self, frame: StartFrame):
+        super().start()
         logging.debug(f"start output frame: {frame}")
 
     async def stop(self):
+        super().stop()
         logging.debug(f"stop output frame")
 
     async def sink(self, frame: DataFrame):
