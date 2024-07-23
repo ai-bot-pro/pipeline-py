@@ -16,6 +16,10 @@ cd pipeline-py && pip install -e .
 pip install apipeline
 ```
 
+## Design
+see [docs/design.md](https://github.com/weedge/pipeline-py/tree/main/docs/design.md)
+
+
 ## Examples
 see [examples](https://github.com/weedge/pipeline-py/tree/main/examples)
 
