@@ -6,7 +6,7 @@
 
 from dataclasses import dataclass, field
 
-from utils.obj import obj_count, obj_id
+from apipeline.utils.obj import obj_count, obj_id
 
 
 @dataclass

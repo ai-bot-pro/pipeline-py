@@ -6,9 +6,9 @@
 
 from typing import Callable, Coroutine, List
 
-from frames.base import Frame
-from pipeline.base_pipeline import BasePipeline
-from processors.frame_processor import FrameDirection, FrameProcessor
+from apipeline.frames.base import Frame
+from apipeline.pipeline.base_pipeline import BasePipeline
+from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 
 
 class PipelineSource(FrameProcessor):

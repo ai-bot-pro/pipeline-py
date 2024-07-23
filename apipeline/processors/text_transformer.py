@@ -6,8 +6,8 @@
 
 from typing import Coroutine
 
-from frames.data_frames import Frame, TextFrame
-from processors.frame_processor import FrameDirection, FrameProcessor
+from apipeline.frames.data_frames import Frame, TextFrame
+from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 
 
 class StatelessTextTransformer(FrameProcessor):

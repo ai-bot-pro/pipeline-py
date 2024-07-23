@@ -6,9 +6,9 @@
 
 import asyncio
 
-from frames.sys_frames import Frame, StartInterruptionFrame
-from frames.control_frames import EndPipeFrame
-from processors.frame_processor import FrameDirection, FrameProcessor
+from apipeline.frames.sys_frames import Frame, StartInterruptionFrame
+from apipeline.frames.control_frames import EndPipeFrame
+from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 
 
 class AsyncFrameProcessor(FrameProcessor):

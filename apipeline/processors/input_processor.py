@@ -1,10 +1,10 @@
 import asyncio
 
-from frames.base import Frame
-from frames.sys_frames import CancelFrame, StartFrame
-from frames.control_frames import EndPipeFrame
-from processors.async_frame_processor import AsyncFrameProcessor
-from processors.frame_processor import FrameDirection
+from apipeline.frames.base import Frame
+from apipeline.frames.sys_frames import CancelFrame, StartFrame
+from apipeline.frames.control_frames import EndPipeFrame
+from apipeline.processors.async_frame_processor import AsyncFrameProcessor
+from apipeline.processors.frame_processor import FrameDirection
 
 
 class InputProcessor(AsyncFrameProcessor):

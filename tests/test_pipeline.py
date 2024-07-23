@@ -3,16 +3,16 @@ import asyncio
 
 import unittest
 
-from frames.control_frames import EndPipeFrame
-from frames.data_frames import DataFrame, TextFrame
-from pipeline.pipeline import Pipeline
-from pipeline.runner import PipelineRunner
-from pipeline.task import PipelineParams, PipelineTask
-from processors.aggregators.sentence import SentenceAggregator
-from processors.frame_processor import FrameProcessor
-from processors.text_transformer import StatelessTextTransformer
-from processors.input_processor import InputFrameProcessor
-from processors.output_processor import OutputFrameProcessor
+from apipeline.frames.control_frames import EndPipeFrame
+from apipeline.frames.data_frames import DataFrame, TextFrame
+from apipeline.pipeline.pipeline import Pipeline
+from apipeline.pipeline.runner import PipelineRunner
+from apipeline.pipeline.task import PipelineParams, PipelineTask
+from apipeline.processors.aggregators.sentence import SentenceAggregator
+from apipeline.processors.frame_processor import FrameProcessor
+from apipeline.processors.text_transformer import StatelessTextTransformer
+from apipeline.processors.input_processor import InputFrameProcessor
+from apipeline.processors.output_processor import OutputFrameProcessor
 
 
 """

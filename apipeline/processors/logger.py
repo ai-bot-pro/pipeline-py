@@ -3,11 +3,11 @@
 #
 # SPDX-License-Identifier: BSD 2-Clause License
 #
-import logging
 from typing import Optional
+import logging
 
-from frames.base import Frame
-from processors.frame_processor import FrameDirection, FrameProcessor
+from apipeline.frames.base import Frame
+from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 
 
 class FrameLogger(FrameProcessor):

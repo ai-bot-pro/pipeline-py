@@ -6,9 +6,9 @@
 
 import re
 
-from frames.control_frames import EndPipeFrame, Frame
-from frames.data_frames import TextFrame
-from processors.frame_processor import FrameDirection, FrameProcessor
+from apipeline.frames.control_frames import EndPipeFrame, Frame
+from apipeline.frames.data_frames import TextFrame
+from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 
 
 class SentenceAggregator(FrameProcessor):

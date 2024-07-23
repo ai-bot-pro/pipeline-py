@@ -1,11 +1,11 @@
-import logging
 from typing import List
+import logging
 
-from frames.data_frames import DataFrame
-from frames.sys_frames import StartFrame
-from processors.frame_processor import FrameProcessor
-from processors.input_processor import InputProcessor
-from processors.output_processor import OutputProcessor
+from apipeline.frames.data_frames import DataFrame
+from apipeline.frames.sys_frames import StartFrame
+from apipeline.processors.frame_processor import FrameProcessor
+from apipeline.processors.input_processor import InputProcessor
+from apipeline.processors.output_processor import OutputProcessor
 
 
 class TestException(BaseException):

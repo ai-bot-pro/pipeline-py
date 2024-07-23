@@ -8,7 +8,7 @@ from abc import abstractmethod
 
 from typing import List
 
-from processors.frame_processor import FrameProcessor
+from apipeline.processors.frame_processor import FrameProcessor
 
 
 class BasePipeline(FrameProcessor):

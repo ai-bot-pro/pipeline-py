@@ -5,11 +5,10 @@
 #
 
 from typing import List
-
-from frames.sys_frames import Frame, SystemFrame
-from processors.frame_processor import FrameDirection, FrameProcessor
-
 import logging
+
+from apipeline.frames.sys_frames import Frame, SystemFrame
+from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 
 
 class GatedAggregator(FrameProcessor):

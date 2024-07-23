@@ -10,11 +10,11 @@ from typing import AsyncIterable, Iterable
 
 from pydantic import BaseModel
 
-from frames.sys_frames import CancelFrame, ErrorFrame, Frame, MetricsFrame, StartFrame, StopTaskFrame
-from frames.control_frames import EndPipeFrame
-from pipeline.base_pipeline import BasePipeline
-from processors.frame_processor import FrameDirection, FrameProcessor
-from utils.obj import obj_count, obj_id
+from apipeline.frames.sys_frames import CancelFrame, ErrorFrame, Frame, MetricsFrame, StartFrame, StopTaskFrame
+from apipeline.frames.control_frames import EndPipeFrame
+from apipeline.pipeline.base_pipeline import BasePipeline
+from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
+from apipeline.utils.obj import obj_count, obj_id
 
 
 class PipelineParams(BaseModel):

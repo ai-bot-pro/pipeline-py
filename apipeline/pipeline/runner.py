@@ -5,12 +5,11 @@
 #
 
 import asyncio
+import logging
 import signal
 
-from pipeline.task import PipelineTask
-from utils.obj import obj_count, obj_id
-
-import logging
+from apipeline.pipeline.task import PipelineTask
+from apipeline.utils.obj import obj_count, obj_id
 
 
 class PipelineRunner:

@@ -10,8 +10,8 @@ import logging
 import time
 
 
-from frames.sys_frames import ErrorFrame, Frame, MetricsFrame, StartFrame, StartInterruptionFrame
-from utils.obj import obj_count, obj_id
+from apipeline.frames.sys_frames import ErrorFrame, Frame, MetricsFrame, StartFrame, StartInterruptionFrame
+from apipeline.utils.obj import obj_count, obj_id
 
 
 class FrameDirection(Enum):

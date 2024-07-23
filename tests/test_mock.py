@@ -1,8 +1,8 @@
 from unittest.mock import Mock
 import unittest
 
-from pipeline.pipeline import Pipeline
-from processors.frame_processor import FrameProcessor
+from apipeline.pipeline.pipeline import Pipeline
+from apipeline.processors.frame_processor import FrameProcessor
 
 
 class TestMock(unittest.TestCase):

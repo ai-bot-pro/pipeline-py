@@ -1,6 +1,7 @@
 from typing import List
-from frames.control_frames import EndPipeFrame
-from pipeline.pipeline import Pipeline
+
+from apipeline.frames.control_frames import EndPipeFrame
+from apipeline.pipeline.pipeline import Pipeline
 
 
 class SequentialMergePipeline(Pipeline):

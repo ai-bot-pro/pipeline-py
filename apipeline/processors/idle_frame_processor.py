@@ -5,12 +5,11 @@
 #
 
 import asyncio
-
 from typing import Awaitable, Callable, List
 
-from frames.sys_frames import Frame, SystemFrame
-from processors.async_frame_processor import AsyncFrameProcessor
-from processors.frame_processor import FrameDirection
+from apipeline.frames.sys_frames import Frame, SystemFrame
+from apipeline.processors.async_frame_processor import AsyncFrameProcessor
+from apipeline.processors.frame_processor import FrameDirection
 
 
 class IdleFrameProcessor(AsyncFrameProcessor):

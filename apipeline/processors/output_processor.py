@@ -2,12 +2,12 @@ import logging
 import asyncio
 from abc import ABC, abstractmethod
 
-from frames.base import Frame
-from frames.data_frames import AudioRawFrame, DataFrame, ImageRawFrame
-from frames.sys_frames import CancelFrame, MetricsFrame, StartFrame, StartInterruptionFrame, StopInterruptionFrame, SystemFrame
-from frames.control_frames import EndPipeFrame
-from processors.async_frame_processor import AsyncFrameProcessor
-from processors.frame_processor import FrameDirection
+from apipeline.frames.base import Frame
+from apipeline.frames.data_frames import DataFrame
+from apipeline.frames.sys_frames import CancelFrame, MetricsFrame, StartFrame, StartInterruptionFrame, StopInterruptionFrame, SystemFrame
+from apipeline.frames.control_frames import EndPipeFrame
+from apipeline.processors.async_frame_processor import AsyncFrameProcessor
+from apipeline.processors.frame_processor import FrameDirection
 
 
 class OutputProcessor(AsyncFrameProcessor, ABC):
