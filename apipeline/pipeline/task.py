@@ -10,8 +10,8 @@ from typing import AsyncIterable, Iterable
 
 from pydantic import BaseModel
 
-from apipeline.frames.sys_frames import CancelFrame, ErrorFrame, Frame, MetricsFrame, StartFrame, StopTaskFrame
-from apipeline.frames.control_frames import EndPipeFrame
+from apipeline.frames.sys_frames import CancelFrame, ErrorFrame, Frame, MetricsFrame, StopTaskFrame
+from apipeline.frames.control_frames import EndFrame, StartFrame
 from apipeline.pipeline.base_pipeline import BasePipeline
 from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 from apipeline.utils.obj import obj_count, obj_id
@@ -60,7 +60,7 @@ class PipelineTask:
 
     async def stop_when_done(self):
         logging.debug(f"Task {self} scheduled to stop when done")
-        await self.queue_frame(EndPipeFrame())
+        await self.queue_frame(EndFrame())
 
     async def cancel(self):
         logging.debug(f"Canceling pipeline task {self}")
@@ -112,7 +112,7 @@ class PipelineTask:
             try:
                 frame = await self._down_queue.get()
                 await self._source.process_frame(frame, FrameDirection.DOWNSTREAM)
-                running = not (isinstance(frame, StopTaskFrame) or isinstance(frame, EndPipeFrame))
+                running = not (isinstance(frame, StopTaskFrame) or isinstance(frame, EndFrame))
                 should_cleanup = not isinstance(frame, StopTaskFrame)
                 self._down_queue.task_done()
             except asyncio.CancelledError:

@@ -2,7 +2,7 @@ from typing import List
 import logging
 
 from apipeline.frames.data_frames import DataFrame
-from apipeline.frames.sys_frames import StartFrame
+from apipeline.frames.control_frames import StartFrame
 from apipeline.processors.frame_processor import FrameProcessor
 from apipeline.processors.input_processor import InputProcessor
 from apipeline.processors.output_processor import OutputProcessor

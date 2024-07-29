@@ -1,6 +1,6 @@
 from typing import List
 
-from apipeline.frames.control_frames import EndPipeFrame
+from apipeline.frames.control_frames import EndFrame
 from apipeline.pipeline.pipeline import Pipeline
 
 
@@ -16,8 +16,8 @@ class SequentialMergePipeline(Pipeline):
         for idx, pipeline in enumerate(self.pipelines):
             while True:
                 frame = await pipeline.sink.get()
-                if isinstance(frame, EndPipeFrame):
+                if isinstance(frame, EndFrame):
                     break
                 await self.sink.put(frame)
 
-        await self.sink.put(EndPipeFrame())
+        await self.sink.put(EndFrame())

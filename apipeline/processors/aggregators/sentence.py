@@ -6,7 +6,7 @@
 
 import re
 
-from apipeline.frames.control_frames import EndPipeFrame, Frame
+from apipeline.frames.control_frames import EndFrame, Frame
 from apipeline.frames.data_frames import TextFrame
 from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 
@@ -43,7 +43,7 @@ class SentenceAggregator(FrameProcessor):
                 self._aggregation = m.group(2)
             else:
                 self._aggregation += frame.text
-        elif isinstance(frame, EndPipeFrame):
+        elif isinstance(frame, EndFrame):
             if self._aggregation:
                 await self.push_frame(TextFrame(self._aggregation))
             await self.push_frame(frame)

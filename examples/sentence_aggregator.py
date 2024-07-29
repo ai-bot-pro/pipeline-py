@@ -1,6 +1,6 @@
 
 import asyncio
-from apipeline.frames.control_frames import EndPipeFrame
+from apipeline.frames.control_frames import EndFrame
 from apipeline.frames.data_frames import DataFrame, TextFrame
 from apipeline.pipeline.pipeline import Pipeline
 from apipeline.pipeline.runner import PipelineRunner
@@ -19,7 +19,7 @@ async def main():
     await task.queue_frame(TextFrame("Hello, "))
     await task.queue_frame(TextFrame("world."))
     await task.queue_frame(TextFrame("hi"))
-    await task.queue_frame(EndPipeFrame())
+    await task.queue_frame(EndFrame())
 
     runner = PipelineRunner()
     await runner.run(task)

@@ -7,7 +7,7 @@
 import asyncio
 
 from apipeline.frames.sys_frames import Frame, StartInterruptionFrame
-from apipeline.frames.control_frames import EndPipeFrame
+from apipeline.frames.control_frames import EndFrame
 from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 
 
@@ -68,6 +68,6 @@ class AsyncFrameProcessor(FrameProcessor):
             try:
                 (frame, direction) = await self._push_queue.get()
                 await self.push_frame(frame, direction)
-                running = not isinstance(frame, EndPipeFrame)
+                running = not isinstance(frame, EndFrame)
             except asyncio.CancelledError:
                 break

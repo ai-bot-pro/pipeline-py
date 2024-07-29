@@ -12,8 +12,8 @@ import asyncio
 from apipeline.pipeline.base_pipeline import BasePipeline
 from apipeline.pipeline.pipeline import Pipeline
 from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
-from apipeline.frames.sys_frames import CancelFrame, Frame, StartFrame
-from apipeline.frames.control_frames import EndPipeFrame
+from apipeline.frames.sys_frames import CancelFrame, Frame
+from apipeline.frames.control_frames import EndFrame, StartFrame
 
 
 class Source(FrameProcessor):
@@ -119,9 +119,9 @@ class ParallelPipeline(BasePipeline):
             # created task instead.
             await asyncio.gather(*[s.process_frame(frame, direction) for s in self._sources])
 
-        # If we get an EndPipeFrame we stop our queue processing tasks and wait on
+        # If we get an EndFrame we stop our queue processing tasks and wait on
         # all the pipelines to finish.
-        if isinstance(frame, CancelFrame) or isinstance(frame, EndPipeFrame):
+        if isinstance(frame, CancelFrame) or isinstance(frame, EndFrame):
             # Use None to indicate when queues should be done processing.
             await self._up_queue.put(None)
             await self._down_queue.put(None)

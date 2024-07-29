@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 
 from apipeline.frames.base import Frame
 from apipeline.frames.data_frames import DataFrame
-from apipeline.frames.sys_frames import CancelFrame, MetricsFrame, StartFrame, StartInterruptionFrame, StopInterruptionFrame, SystemFrame
-from apipeline.frames.control_frames import EndPipeFrame
+from apipeline.frames.sys_frames import CancelFrame, MetricsFrame, StartInterruptionFrame, StopInterruptionFrame, SystemFrame
+from apipeline.frames.control_frames import EndFrame, StartFrame
 from apipeline.processors.async_frame_processor import AsyncFrameProcessor
 from apipeline.processors.frame_processor import FrameDirection
 
@@ -69,7 +69,7 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         # If we are finishing, wait here until we have stopped, otherwise we might
         # close things too early upstream. We need this event because we don't
         # know when the internal threads will finish.
-        if isinstance(frame, CancelFrame) or isinstance(frame, EndPipeFrame):
+        if isinstance(frame, CancelFrame) or isinstance(frame, EndFrame):
             await self._stopped_event.wait()
 
     async def send_metrics(self, frame: MetricsFrame):
@@ -111,7 +111,7 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
                 else:
                     await self.queue_frame(frame)
 
-                if isinstance(frame, EndPipeFrame):
+                if isinstance(frame, EndFrame):
                     await self.stop()
 
                 self._sink_queue.task_done()

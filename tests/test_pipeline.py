@@ -3,7 +3,7 @@ import asyncio
 
 import unittest
 
-from apipeline.frames.control_frames import EndPipeFrame
+from apipeline.frames.control_frames import EndFrame
 from apipeline.frames.data_frames import DataFrame, TextFrame
 from apipeline.pipeline.pipeline import Pipeline
 from apipeline.pipeline.runner import PipelineRunner
@@ -56,7 +56,7 @@ class TestSentenceAggregatorPipeline(unittest.IsolatedAsyncioTestCase):
         await task.queue_frame(TextFrame("Hello, "))
         await task.queue_frame(TextFrame("world."))
         await task.queue_frame(TextFrame("hi"))
-        await task.queue_frame(EndPipeFrame())
+        await task.queue_frame(EndFrame())
 
         runner = PipelineRunner()
 
@@ -89,7 +89,7 @@ class TestSentenceAggregatorPipeline(unittest.IsolatedAsyncioTestCase):
         sentence = "Hello, world. It's me, a pipeline."
         for c in sentence:
             await task.queue_frame(TextFrame(c))
-        await task.queue_frame(EndPipeFrame())
+        await task.queue_frame(EndFrame())
 
         runner = PipelineRunner()
 

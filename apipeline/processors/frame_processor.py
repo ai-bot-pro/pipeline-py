@@ -10,7 +10,8 @@ import logging
 import time
 
 
-from apipeline.frames.sys_frames import ErrorFrame, Frame, MetricsFrame, StartFrame, StartInterruptionFrame
+from apipeline.frames.sys_frames import ErrorFrame, Frame, MetricsFrame, StartInterruptionFrame
+from apipeline.frames.control_frames import StartFrame
 from apipeline.utils.obj import obj_count, obj_id
 
 
