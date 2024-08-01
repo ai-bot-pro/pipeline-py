@@ -72,6 +72,7 @@ class FrameProcessor:
             **kwargs):
         self.id: int = obj_id()
         self.name = name or f"{self.__class__.__name__}#{obj_count(self)}"
+        self._parent_pipeline: "FrameProcessor" | None = None
         self._prev: "FrameProcessor" | None = None
         self._next: "FrameProcessor" | None = None
         self._loop: asyncio.AbstractEventLoop = loop or asyncio.get_running_loop()
@@ -132,13 +133,19 @@ class FrameProcessor:
     async def cleanup(self):
         pass
 
-    def link(self, processor: 'FrameProcessor'):
+    def link(self, processor: "FrameProcessor"):
         self._next = processor
         processor._prev = self
         logging.debug(f"Linking {self} -> {self._next}")
 
     def get_event_loop(self) -> asyncio.AbstractEventLoop:
         return self._loop
+
+    def set_parent_pipeline(self, pipeline: "FrameProcessor"):
+        self._parent_pipeline = pipeline
+
+    def get_parent_pipeline(self) -> "FrameProcessor":
+        return self._parent_pipeline
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
         if frame in self._skip_frames:
