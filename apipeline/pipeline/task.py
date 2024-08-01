@@ -94,8 +94,9 @@ class PipelineTask:
 
     def _initial_metrics_frame(self) -> MetricsFrame:
         processors = self._pipeline.processors_with_metrics()
-        ttfb = dict(zip([p.name for p in processors], [0] * len(processors)))
-        return MetricsFrame(ttfb=ttfb)
+        ttfb = [{"processor": p.name, "value": 0.0} for p in processors]
+        processing = [{"processor": p.name, "value": 0.0} for p in processors]
+        return MetricsFrame(ttfb=ttfb, processing=processing)
 
     async def _process_down_queue(self):
         start_frame = StartFrame(
