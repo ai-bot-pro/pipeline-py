@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from apipeline.frames.base import Frame
 from apipeline.frames.data_frames import DataFrame
 from apipeline.frames.sys_frames import CancelFrame, MetricsFrame, StartInterruptionFrame, StopInterruptionFrame, SystemFrame
-from apipeline.frames.control_frames import EndFrame, StartFrame
+from apipeline.frames.control_frames import ControlFrame, EndFrame, StartFrame
 from apipeline.processors.async_frame_processor import AsyncFrameProcessor
 from apipeline.processors.frame_processor import FrameDirection
 
@@ -76,7 +76,7 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         pass
 
     async def _handle_interruptions(self, frame: Frame):
-        if not self.interruptions_allowed():
+        if not self.interruptions_allowed:
             return
 
         if isinstance(frame, StartInterruptionFrame):
@@ -103,11 +103,18 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
             try:
                 frame = await self._sink_queue.get()
                 # print(f"_sink_queue.get: {frame}")
+                # sink data frame
                 if isinstance(frame, DataFrame):
                     await self.sink(frame)
-                    # if sink is async put to queue, need wait sink task done
+                    # subclass need wait sink task done
                     await self._sink_event.wait()
                     self._sink_event.clear()
+                # sink sys frame
+                elif isinstance(frame, SystemFrame):
+                    await self.sink_sys_frame(frame)
+                # sink control frame
+                elif isinstance(frame, ControlFrame):
+                    await self.sink_control_frame(frame)
                 else:
                     await self.queue_frame(frame)
 
@@ -126,6 +133,16 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         Multimoding(text,audio,image) Sink, use _sink_event to set
         """
         raise NotImplementedError
+
+    async def sink_sys_frame(self, frame: SystemFrame):
+        logging.debug(
+            f"f{self.__class__.__name__} process_sys_frame {frame} doing")
+        await self.queue_frame(frame)
+
+    async def sink_control_frame(self, frame: ControlFrame):
+        logging.debug(
+            f"f{self.__class__.__name__} process_control_frame {frame} doing")
+        await self.queue_frame(frame)
 
 
 class OutputFrameProcessor(OutputProcessor):

@@ -24,15 +24,18 @@ class InputProcessor(AsyncFrameProcessor):
         pass
 
     async def process_sys_frame(self, frame: Frame, direction: FrameDirection):
-        logging.info(f"f{self.__class__.__name__} process_sys_frame doing")
+        logging.debug(
+            f"f{self.__class__.__name__} process_sys_frame {frame} direction:{direction} doing")
         await self.queue_frame(frame, direction)
 
     async def process_control_frame(self, frame: Frame, direction: FrameDirection):
-        logging.info(f"f{self.__class__.__name__} process_control_frame doing")
+        logging.debug(
+            f"f{self.__class__.__name__} process_control_frame {frame} direction:{direction} doing")
         await self.queue_frame(frame, direction)
 
     async def process_data_frame(self, frame: Frame, direction: FrameDirection):
-        logging.info(f"f{self.__class__.__name__} process_data_frame doing")
+        logging.debug(
+            f"f{self.__class__.__name__} process_data_frame {frame} direction:{direction} doing")
         await self.queue_frame(frame, direction)
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
