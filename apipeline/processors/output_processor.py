@@ -11,6 +11,10 @@ from apipeline.processors.frame_processor import FrameDirection
 
 
 class OutputProcessor(AsyncFrameProcessor, ABC):
+    r"""
+    output processor with start, stop control frames and cancel sys frames
+    sink data frame and control frames
+    """
 
     def __init__(
             self,
@@ -32,45 +36,47 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         if self._sink_task.cancelled():
             self._create_sink_task()
 
-    async def stop(self):
-        self._stopped_event.set()
+    async def stop(self, frame: EndFrame):
+        # Wait for the push frame and sink tasks to finish. They will finish when
+        # the EndFrame is actually processed.
+        await self._push_frame_task
+        await self._sink_task
 
-    async def cleanup(self):
+    async def cancel(self, frame: CancelFrame):
+        # Cancel all the tasks and wait for them to finish.
+        self._push_frame_task.cancel()
+        await self._push_frame_task
+
         self._sink_task.cancel()
         await self._sink_task
-        await super().cleanup()
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
         await super().process_frame(frame, direction)
 
         #
-        # Out-of-band frames like (CancelFrame or StartInterruptionFrame) are
-        # pushed immediately. Other frames require order so they are put in the
-        # sink queue.
+        # System frames (like StartInterruptionFrame) are pushed immediately.
+        # Other frames require order so they are put in the sink queue.
         #
-        if isinstance(frame, StartFrame):
-            await self.start(frame)
+        if isinstance(frame, CancelFrame):
             await self.push_frame(frame, direction)
-        # EndFrame is managed in the sink queue handler.
-        elif isinstance(frame, CancelFrame):
-            await self.stop()
-            await self.push_frame(frame, direction)
+            await self.cancel(frame)
         elif isinstance(frame, StartInterruptionFrame) or isinstance(frame, StopInterruptionFrame):
+            await self.push_frame(frame, direction)
             await self._handle_interruptions(frame)
-            await self.push_frame(frame, direction)
         elif isinstance(frame, MetricsFrame):
-            await self.send_metrics(frame)
             await self.push_frame(frame, direction)
+            await self.send_metrics(frame)
         elif isinstance(frame, SystemFrame):
             await self.push_frame(frame, direction)
+        # Control frames.
+        elif isinstance(frame, StartFrame):
+            await self._sink_queue.put(frame)
+            await self.start(frame)
+        elif isinstance(frame, EndFrame):
+            await self._sink_queue.put(frame)
+            await self.stop(frame)
         else:
             await self._sink_queue.put(frame)
-
-        # If we are finishing, wait here until we have stopped, otherwise we might
-        # close things too early upstream. We need this event because we don't
-        # know when the internal threads will finish.
-        if isinstance(frame, CancelFrame) or isinstance(frame, EndFrame):
-            await self._stopped_event.wait()
 
     async def send_metrics(self, frame: MetricsFrame):
         pass
@@ -99,7 +105,8 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         self._sink_task = loop.create_task(self._sink_task_handler())
 
     async def _sink_task_handler(self):
-        while True:
+        running = True
+        while running:
             try:
                 frame = await self._sink_queue.get()
                 # print(f"_sink_queue.get: {frame}")
@@ -109,17 +116,13 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
                     # subclass need wait sink task done
                     await self._sink_event.wait()
                     self._sink_event.clear()
-                # sink sys frame
-                elif isinstance(frame, SystemFrame):
-                    await self.sink_sys_frame(frame)
                 # sink control frame
                 elif isinstance(frame, ControlFrame):
                     await self.sink_control_frame(frame)
                 else:
                     await self.queue_frame(frame)
 
-                if isinstance(frame, EndFrame):
-                    await self.stop()
+                running = not isinstance(frame, EndFrame)
 
                 self._sink_queue.task_done()
             except asyncio.CancelledError:
@@ -134,14 +137,12 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         """
         raise NotImplementedError
 
-    async def sink_sys_frame(self, frame: SystemFrame):
-        logging.debug(
-            f"f{self.__class__.__name__} process_sys_frame {frame} doing")
-        await self.queue_frame(frame)
-
     async def sink_control_frame(self, frame: ControlFrame):
+        """
+        flow stream to control frame start, end, e.g. until await task future is finished
+        """
         logging.debug(
-            f"f{self.__class__.__name__} process_control_frame {frame} doing")
+            f"{self.__class__.__name__} process_control_frame {frame} doing")
         await self.queue_frame(frame)
 
 
@@ -159,6 +160,7 @@ class OutputFrameProcessor(OutputProcessor):
         self._cb = cb
         self._out_task = None
         if self._cb:
+            self._running = True
             self._create_output_task()
 
     @property
@@ -175,34 +177,42 @@ class OutputFrameProcessor(OutputProcessor):
     async def sink(self, frame: DataFrame):
         await self._out_queue.put(frame)
 
+    async def sink_control_frame(self, frame: ControlFrame):
+        self._running = not isinstance(frame, EndFrame)
+        return await super().sink_control_frame(frame)
+
     def _create_output_task(self):
         self._out_task = self.get_event_loop().create_task(self._out_push_task_handler())
 
     async def _out_push_task_handler(self):
-        running = True
-        while running:
+        while self._running:
             try:
-                frame = await self._out_queue.get()
+                async with asyncio.timeout(0.1):
+                    frame = await self._out_queue.get()
                 # print(f"_out_queue.get: {frame}")
                 if asyncio.iscoroutinefunction(self._cb):
                     await self._cb(frame)
                 else:
                     self._cb(frame)
+                self._out_queue.task_done()
                 self._sink_event.set()
+            except TimeoutError:
+                continue
             except asyncio.CancelledError:
                 break
 
-    async def start(self, frame: Frame):
+    async def start(self, frame: StartFrame):
         if self._out_task is None or self._out_task.cancelled():
             self._create_output_task()
+        await super().start(frame)
 
-    async def stop(self):
+    async def stop(self, frame: EndFrame):
+        await self._out_task
+        await super().stop(frame)
+
+    async def cancel(self, frame: CancelFrame):
         if self._out_task and self._out_task.cancelled() is False:
             self._out_task.cancel()
             await self._out_task
             self._out_task = None
-        await super().stop()
-
-    async def cleanup(self):
-        await self.stop()
-        await super().cleanup()
+        await super().cancel(frame)
