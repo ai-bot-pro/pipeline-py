@@ -30,14 +30,15 @@ class AudioRawFrame(DataFrame):
     """
     audio: bytes
     sample_rate: int
+    sample_width: int
     num_channels: int
 
     def __post_init__(self):
         super().__post_init__()
-        self.num_frames = int(len(self.audio) / (self.num_channels * 2))
+        self.num_frames = int(len(self.audio) / (self.num_channels * self.sample_width))
 
     def __str__(self):
-        return f"{self.name}(size: {len(self.audio)}, frames: {self.num_frames}, sample_rate: {self.sample_rate}, channels: {self.num_channels})"
+        return f"{self.name}(size: {len(self.audio)}, frames: {self.num_frames}, sample_rate: {self.sample_rate},sample_width: {self.sample_width}, channels: {self.num_channels})"
 
 
 @dataclass
