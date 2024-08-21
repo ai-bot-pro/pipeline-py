@@ -29,9 +29,9 @@ class AudioRawFrame(DataFrame):
 
     """
     audio: bytes
-    sample_rate: int
-    sample_width: int
-    num_channels: int
+    sample_rate: int = 16000
+    num_channels: int = 1
+    sample_width: int = 2
 
     def __post_init__(self):
         super().__post_init__()
