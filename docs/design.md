@@ -24,6 +24,6 @@
 
   In a multi-modal scenario, when processing real-time online content such as text (rich text), pictures, audio, and video, multiple multi-modal data will be displayed at the same time. At this time, during the data pipeline operation (corresponding processor), the data needs to be processed asynchronously. The asynchronous queue task method is used here. When synchronization is required, synchronization events are set.
   
-- 如果是大数据处理，离线处理的情况，可以加速数据的处理，可能需要保留中间数据过程，数据格式一般是序列化列式存储，方便批量加载处理，常见的库[Apache Arrow](https://arrow.apache.org/)列格式，以及绿厂的[cudf](https://github.com/rapidsai/cudf)使用gpu加速处理， 这些操作processor作为todo事项以后实现
+- 如果是大数据处理，离线处理的情况，可以加速数据的处理，可能需要保留中间数据过程，数据格式一般是序列化列式存储，方便批量加载处理，常见的库[Apache Arrow](https://arrow.apache.org/)列格式，以及绿厂的[cudf](https://github.com/rapidsai/cudf)使用gpu加速处理("绿箭")， 这些操作processor作为todo事项以后实现
 
   If it is big data processing, offline processing can speed up the data processing, and the intermediate data process may need to be retained. The data format is generally serialized column storage, which facilitates batch loading processing. The common library Apache Arrow column format, and Green Factory cudf uses gpu accelerated processing, and these operations processor will be implemented as todo items later.
