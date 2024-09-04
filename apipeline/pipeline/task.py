@@ -20,6 +20,8 @@ from apipeline.utils.obj import obj_count, obj_id
 class PipelineParams(BaseModel):
     allow_interruptions: bool = False
     enable_metrics: bool = False
+    enable_usage_metrics: bool = False
+    send_initial_empty_metrics: bool = True
     report_only_initial_ttfb: bool = False
 
 
@@ -34,9 +36,18 @@ class Source(FrameProcessor):
 
         match direction:
             case FrameDirection.UPSTREAM:
-                await self._up_queue.put(frame)
+                await self._handle_upstream_frame(frame)
             case FrameDirection.DOWNSTREAM:
                 await self.push_frame(frame, direction)
+
+    async def _handle_upstream_frame(self, frame: Frame):
+        if isinstance(frame, ErrorFrame):
+            logging.error(f"Error running app: {frame}")
+            if frame.fatal:
+                # Cancel all tasks downstream.
+                await self.push_frame(CancelFrame())
+                # Tell the task we should stop.
+                await self._up_queue.put(StopTaskFrame())
 
 
 class PipelineTask:
@@ -67,7 +78,7 @@ class PipelineTask:
         # Make sure everything is cleaned up downstream. This is sent
         # out-of-band from the main streaming task which is what we want since
         # we want to cancel right away.
-        await self._source.process_frame(CancelFrame(), FrameDirection.DOWNSTREAM)
+        await self._source.push_frame(CancelFrame())
         self._process_down_task.cancel()
         self._process_up_task.cancel()
         await self._process_down_task
@@ -102,10 +113,12 @@ class PipelineTask:
         start_frame = StartFrame(
             allow_interruptions=self._params.allow_interruptions,
             enable_metrics=self._params.enable_metrics,
+            enable_usage_metrics=self._params.enable_metrics,
             report_only_initial_ttfb=self._params.report_only_initial_ttfb
         )
         await self._source.process_frame(start_frame, FrameDirection.DOWNSTREAM)
-        await self._source.process_frame(self._initial_metrics_frame(), FrameDirection.DOWNSTREAM)
+        if self._params.enable_metrics and self._params.send_initial_empty_metrics:
+            await self._source.process_frame(self._initial_metrics_frame(), FrameDirection.DOWNSTREAM)
 
         running = True
         should_cleanup = True
@@ -130,9 +143,8 @@ class PipelineTask:
         while True:
             try:
                 frame = await self._up_queue.get()
-                if isinstance(frame, ErrorFrame):
-                    logging.error(f"Error running app: {frame.error}")
-                    await self.queue_frame(CancelFrame())
+                if isinstance(frame, StopTaskFrame):
+                    await self.queue_frame(StopTaskFrame())
                 self._up_queue.task_done()
             except asyncio.CancelledError:
                 break
