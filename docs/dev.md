@@ -14,6 +14,7 @@ pip install -e .
 ```
 3. change `setup.py` version, then deploy
 ```shell
+pip install wheel
 rm -rf dist && python3 setup.py sdist bdist_wheel
 twine upload --verbose --skip-existing dist/*
 ```

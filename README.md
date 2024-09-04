@@ -2,6 +2,10 @@
     <img src="https://github.com/user-attachments/assets/37c0d68d-c6d1-4e3b-a01e-d231c8ff36b6" alt="">
 </div>
 
+# apipeline
+[![PyPI](https://img.shields.io/pypi/v/apipeline)](https://pypi.org/project/apipeline/)
+<a href="https://app.commanddash.io/agent/github_ai-bot-pro_pipeline-py"><img src="https://img.shields.io/badge/AI-Code%20Agent-EB9FDA"></a>
+
 ## Installation
 - local To install apipeline(pipeline-python):
 ```

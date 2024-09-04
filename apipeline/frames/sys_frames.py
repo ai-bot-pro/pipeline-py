@@ -24,17 +24,18 @@ class CancelFrame(SystemFrame):
 class ErrorFrame(SystemFrame):
     """This is used notify upstream that an error has occurred downstream the
     pipeline."""
-    error: str | None
+    error: str
+    fatal: bool = False
 
     def __str__(self):
-        return f"{self.name}(error: {self.error})"
+        return f"{self.name}(error: {self.error}, fatal: {self.fatal})"
 
 
 @dataclass
 class StopTaskFrame(SystemFrame):
-    """Indicates that a pipeline task should be stopped. This should inform the
-    pipeline processors that they should stop pushing frames but that they
-    should be kept in a running state.
+    """Indicates that a pipeline task should be stopped but that the pipeline
+    processors should be kept in a running state. This is normally queued from
+    the pipeline task.
 
     """
     pass
