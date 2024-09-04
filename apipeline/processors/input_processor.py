@@ -51,8 +51,8 @@ class InputProcessor(AsyncFrameProcessor):
             await self.process_sys_frame(frame, direction)
         # Control frames
         elif isinstance(frame, StartFrame):
-            await self.start(frame)
             await self.queue_frame(frame, direction)
+            await self.start(frame)
         elif isinstance(frame, EndFrame):
             await self.queue_frame(frame, direction)
             await self.stop()
