@@ -46,10 +46,13 @@ class ImageRawFrame(DataFrame):
     """An image. Will be shown by the transport if the transport's camera is
     enabled.
 
+    e.g.: image info from PIL.Image
     """
     image: bytes
     size: Tuple[int, int]
     format: str | None
+    # https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes
+    mode: str | None
 
     def __str__(self):
         return f"{self.name}(size: {self.size}, format: {self.format})"
