@@ -97,7 +97,6 @@ class TestSentenceAggregatorPipeline(unittest.IsolatedAsyncioTestCase):
 
         print(self.text)
         self.assertEqual(self.text, [
-            "H E L L O ,   W O R L D .",
-            "   I T ' S   M E ,   A   P I P E L I N E .",
-            " ",
+            "H E L L O ,   W O R L D . ",
+            "  I T ' S   M E ,   A   P I P E L I N E . ",
         ])

@@ -1,23 +1,16 @@
 import unittest
 from apipeline.frames.control_frames import EndFrame
-from apipeline.frames.sys_frames import CancelFrame
+from apipeline.frames.sys_frames import CancelFrame, StopTaskFrame
 from apipeline.pipeline.pipeline import Pipeline, FrameDirection
 from apipeline.pipeline.task import PipelineTask, PipelineParams
 from apipeline.pipeline.runner import PipelineRunner
-from apipeline.frames.data_frames import Frame, TextFrame
+from apipeline.frames.data_frames import Frame, TextFrame, ImageRawFrame, AudioRawFrame
 from apipeline.processors.frame_processor import FrameProcessor
 
 
 """
 python -m unittest tests.test_simple.TestSimple
 """
-
-
-class PushProcessor(FrameProcessor):
-    async def process_frame(self, frame: Frame, direction: FrameDirection):
-        await super().process_frame(frame, direction)
-        await self.push_frame(TextFrame("你好"))
-        print("ok")
 
 
 class FrameTraceLogger(FrameProcessor):
@@ -31,15 +24,13 @@ class FrameTraceLogger(FrameProcessor):
         from_to = f"{self._prev} ---> {self}"
         if direction == FrameDirection.UPSTREAM:
             from_to = f"{self} <--- {self._next} "
-        elif isinstance(frame, TextFrame):
-            print(f"{from_to} get TextFrame: {frame}, text:{len(frame.text)}")
+        print(f"{from_to} get Frame: {frame}")
 
 
 class TestSimple(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
 
         pipeline = Pipeline([
-            PushProcessor(),
             FrameTraceLogger(),
         ])
 
@@ -53,5 +44,8 @@ class TestSimple(unittest.IsolatedAsyncioTestCase):
 
     async def test_run(self):
         runner = PipelineRunner()
-        # await self.task.queue_frame(TextFrame("你好"))
+        await self.task.queue_frame(TextFrame("你好"))
+        await self.task.queue_frame(ImageRawFrame(image=bytes([]), size=(0, 0), format="PNG", mode="RGB"))
+        await self.task.queue_frame(AudioRawFrame(audio=bytes([])))
+        await self.task.queue_frame(EndFrame())
         await runner.run(self.task)

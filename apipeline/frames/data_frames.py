@@ -55,4 +55,4 @@ class ImageRawFrame(DataFrame):
     mode: str | None
 
     def __str__(self):
-        return f"{self.name}(size: {self.size}, format: {self.format})"
+        return f"{self.name}(size: {self.size}, format: {self.format}, mode: {self.mode})"

@@ -6,6 +6,8 @@
 [![PyPI](https://img.shields.io/pypi/v/apipeline)](https://pypi.org/project/apipeline/)
 <a href="https://app.commanddash.io/agent/github_ai-bot-pro_pipeline-py"><img src="https://img.shields.io/badge/AI-Code%20Agent-EB9FDA"></a>
 
+> python --version >=3.10 with [asyncio-task](https://docs.python.org/3.11/library/asyncio-task.html)
+
 ## Installation
 - local To install apipeline(pipeline-python):
 ```

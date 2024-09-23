@@ -187,8 +187,7 @@ class OutputFrameProcessor(OutputProcessor):
     async def _out_push_task_handler(self):
         while self._running:
             try:
-                async with asyncio.timeout(0.1):
-                    frame = await self._out_queue.get()
+                frame = await asyncio.wait_for(self._out_queue.get(), 0.1)
                 # print(f"_out_queue.get: {frame}")
                 if asyncio.iscoroutinefunction(self._cb):
                     await self._cb(frame)
@@ -198,8 +197,13 @@ class OutputFrameProcessor(OutputProcessor):
                 self._sink_event.set()
             except TimeoutError:
                 continue
+            except asyncio.TimeoutError:
+                continue
             except asyncio.CancelledError:
+                logging.warning("Output push task was cancelled.")
                 break
+            except Exception as ex:
+                logging.exception(f"Unexpected error in _out_push_task_handler: {ex}")
 
     async def start(self, frame: StartFrame):
         if self._out_task is None or self._out_task.cancelled():
