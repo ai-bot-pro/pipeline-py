@@ -6,10 +6,10 @@
 
 from typing import List
 
-from frames.sys_frames import Frame, SystemFrame
-from frames.control_frames import ControlFrame
-from frames.app_frames import AppFrame
-from processors.frame_processor import FrameDirection, FrameProcessor
+from apipeline.frames.sys_frames import Frame, SystemFrame
+from apipeline.frames.control_frames import ControlFrame
+from apipeline.frames.app_frames import AppFrame
+from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 
 
 class FrameFilter(FrameProcessor):
