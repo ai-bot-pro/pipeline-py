@@ -21,6 +21,6 @@ class FrameLogger(FrameProcessor):
         msg = f"{dir} {self._prefix}: {frame}"
         if self._color:
             msg = f"<{self._color}>{msg}</>"
-        logging.debug(msg)
+        logging.info(msg)
 
         await self.push_frame(frame, direction)

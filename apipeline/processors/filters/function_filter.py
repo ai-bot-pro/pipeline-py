@@ -6,8 +6,8 @@
 
 from typing import Awaitable, Callable
 
-from frames.sys_frames import Frame, SystemFrame
-from processors.frame_processor import FrameDirection, FrameProcessor
+from apipeline.frames.sys_frames import Frame, SystemFrame
+from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 
 
 class FunctionFilter(FrameProcessor):
