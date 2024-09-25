@@ -80,6 +80,7 @@ class FrameProcessor:
         # Properties
         self._allow_interruptions = False
         self._enable_metrics = False
+        self._enable_usage_metrics = False
         self._report_only_initial_ttfb = False
 
         # Metrics
@@ -95,6 +96,10 @@ class FrameProcessor:
     @property
     def metrics_enabled(self):
         return self._enable_metrics
+
+    @property
+    def usage_metrics_enabled(self):
+        return self._enable_usage_metrics
 
     @property
     def report_only_initial_ttfb(self):
@@ -154,6 +159,7 @@ class FrameProcessor:
         if isinstance(frame, StartFrame):
             self._allow_interruptions = frame.allow_interruptions
             self._enable_metrics = frame.enable_metrics
+            self._enable_usage_metrics = frame.enable_usage_metrics
             self._report_only_initial_ttfb = frame.report_only_initial_ttfb
         elif isinstance(frame, StartInterruptionFrame):
             await self.stop_all_metrics()

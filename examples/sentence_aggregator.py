@@ -16,6 +16,8 @@ async def main():
     pipeline = Pipeline([aggregator, out_processor])
     task = PipelineTask(pipeline, PipelineParams(allow_interruptions=True))
 
+    await task.queue_frame(TextFrame("你好，hello. hi"))
+    await task.queue_frame(TextFrame("你叫什么？"))
     await task.queue_frame(TextFrame("Hello, "))
     await task.queue_frame(TextFrame("world."))
     await task.queue_frame(TextFrame("hi"))
