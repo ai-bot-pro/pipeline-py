@@ -71,3 +71,7 @@ class MetricsFrame(SystemFrame):
     processing: List[Mapping[str, Any]] | None = None
     tokens: List[Mapping[str, Any]] | None = None
     characters: List[Mapping[str, Any]] | None = None
+
+    def __str__(self):
+        p_str = f"{self.name} ttfb:{self.ttfb} | processing:{self.processing} | tokens:{self.tokens} | characters:{self.characters}"
+        return p_str
