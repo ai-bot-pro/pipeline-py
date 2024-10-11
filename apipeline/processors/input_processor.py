@@ -43,9 +43,9 @@ class InputProcessor(AsyncFrameProcessor):
 
         # System frames
         if isinstance(frame, CancelFrame):
-            await self.stop()
             # We don't queue a CancelFrame since we want to stop ASAP.
             await self.push_frame(frame, direction)
+            await self.stop()
         # all other system frames
         elif isinstance(frame, SystemFrame):
             await self.process_sys_frame(frame, direction)
@@ -96,11 +96,11 @@ class InputFrameProcessor(InputProcessor):
                 break
 
     async def start(self, frame: Frame):
-        if self._in_task is not None and self._in_task.cancelled:
+        if self._in_task is not None and self._in_task.cancelled():
             self._create_input_task()
 
     async def stop(self):
-        if self._in_task is not None and self._in_task and not self._in_task.cancelled:
+        if self._in_task is not None and self._in_task and not self._in_task.cancelled():
             self._in_task.cancel()
             await self._in_task
 

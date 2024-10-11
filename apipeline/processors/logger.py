@@ -1,8 +1,3 @@
-#
-# Copyright (c) 2024, Daily
-#
-# SPDX-License-Identifier: BSD 2-Clause License
-#
 from typing import Optional
 import logging
 
@@ -20,11 +15,13 @@ class FrameLogger(FrameProcessor):
         super().__init__()
         self._prefix = prefix
         self._color = color
-        self._ignored_frame_types = tuple(ignored_frame_types) if ignored_frame_types else None
+        self._ignored_frame_types = tuple(
+            ignored_frame_types) if ignored_frame_types is not None else None
         self._include_frame_types = tuple(include_frame_types) if include_frame_types else None
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
-        if self._ignored_frame_types and not isinstance(frame, self._ignored_frame_types):
+        if self._ignored_frame_types is not None and not isinstance(
+                frame, self._ignored_frame_types):
             if not self._include_frame_types \
                 or (self._include_frame_types
                     and isinstance(frame, self._include_frame_types)):
