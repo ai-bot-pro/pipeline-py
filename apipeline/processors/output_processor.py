@@ -211,7 +211,7 @@ class OutputFrameProcessor(OutputProcessor):
         await super().start(frame)
 
     async def stop(self, frame: EndFrame):
-        await self._out_task
+        self._out_task and await self._out_task
         await super().stop(frame)
 
     async def cancel(self, frame: CancelFrame):

@@ -1,9 +1,3 @@
-#
-# Copyright (c) 2024, Daily
-#
-# SPDX-License-Identifier: BSD 2-Clause License
-#
-
 from typing import Awaitable, Callable
 
 from apipeline.frames.sys_frames import Frame, SystemFrame
