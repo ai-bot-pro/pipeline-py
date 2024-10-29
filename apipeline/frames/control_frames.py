@@ -20,6 +20,7 @@ class StartFrame(ControlFrame):
     enable_usage_metrics: bool = False
     report_only_initial_ttfb: bool = False
 
+
 @dataclass
 class EndFrame(ControlFrame):
     """Indicates that a pipeline has ended and frame processors and pipelines
@@ -29,4 +30,10 @@ class EndFrame(ControlFrame):
     was sent (unline system frames).
 
     """
+    pass
+
+
+@dataclass
+class SyncFrame(ControlFrame):
+    """This frame is used to know when the internal pipelines have finished."""
     pass

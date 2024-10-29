@@ -9,6 +9,8 @@ from typing import List
 import asyncio
 import logging
 
+from apipeline.frames.control_frames import EndFrame, SyncFrame
+from apipeline.frames.sys_frames import SystemFrame
 from apipeline.pipeline.base_pipeline import BasePipeline
 from apipeline.pipeline.pipeline import Pipeline
 from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
@@ -47,7 +49,7 @@ class Sink(FrameProcessor):
                 await self._down_queue.put(frame)
 
 
-class ParallelTask(BasePipeline):
+class SyncParallelPipeline(BasePipeline):
     def __init__(self, *args):
         super().__init__()
 
@@ -55,6 +57,7 @@ class ParallelTask(BasePipeline):
             raise Exception(f"ParallelTask needs at least one argument")
 
         self._sinks = []
+        self._sources = []
         self._pipelines = []
 
         self._up_queue = asyncio.Queue()
@@ -66,13 +69,16 @@ class ParallelTask(BasePipeline):
                 raise TypeError(f"ParallelTask argument {processors} is not a list")
 
             # We add a source at the beginning of the pipeline and a sink at the end.
-            source = Source(self._up_queue)
-            sink = Sink(self._down_queue)
-            processors: List[FrameProcessor] = [source] + processors
-            processors.append(sink)
+            up_queue = asyncio.Queue()
+            down_queue = asyncio.Queue()
+            source = Source(up_queue)
+            sink = Sink(down_queue)
+            processors: List[FrameProcessor] = [source] + processors + [sink]
 
-            # Keep track of sinks. We access the source through the pipeline.
-            self._sinks.append(sink)
+            # Keep track of sources and sinks. We also keep the output queue of
+            # the source and the sinks so we can use it later.
+            self._sources.append({"processor": source, "queue": down_queue})
+            self._sinks.append({"processor": sink, "queue": up_queue})
 
             # Create pipeline
             pipeline = Pipeline(processors)
@@ -93,12 +99,45 @@ class ParallelTask(BasePipeline):
     async def process_frame(self, frame: Frame, direction: FrameDirection):
         await super().process_frame(frame, direction)
 
+        # The last processor of each pipeline needs to be synchronous otherwise
+        # this element won't work. Since, we know it should be synchronous we
+        # push a SyncFrame. Since frames are ordered we know this frame will be
+        # pushed after the synchronous processor has pushed its data allowing us
+        # to synchrnonize all the internal pipelines by waiting for the
+        # SyncFrame in all of them.
+        async def wait_for_sync(
+            obj, main_queue: asyncio.Queue, frame: Frame, direction: FrameDirection
+        ):
+            processor: FrameProcessor = obj["processor"]
+            queue: asyncio.Queue = obj["queue"]
+            await processor.process_frame(frame, direction)
+            if isinstance(frame, (SystemFrame, EndFrame)):
+                new_frame = await queue.get()
+                if isinstance(new_frame, (SystemFrame, EndFrame)):
+                    await main_queue.put(new_frame)
+                else:
+                    while not isinstance(new_frame, (SystemFrame, EndFrame)):
+                        await main_queue.put(new_frame)
+                        queue.task_done()
+                        new_frame = await queue.get()
+            else:
+                await processor.process_frame(SyncFrame(), direction)
+                new_frame = await queue.get()
+                while not isinstance(new_frame, SyncFrame):
+                    await main_queue.put(new_frame)
+                    queue.task_done()
+                    new_frame = await queue.get()
+
         if direction == FrameDirection.UPSTREAM:
             # If we get an upstream frame we process it in each sink.
-            await asyncio.gather(*[s.process_frame(frame, direction) for s in self._sinks])
+            await asyncio.gather(
+                *[wait_for_sync(s, self._up_queue, frame, direction) for s in self._sinks]
+            )
         elif direction == FrameDirection.DOWNSTREAM:
-            # If we get a downstream frame we process it in each source (using the pipeline).
-            await asyncio.gather(*[p.process_frame(frame, direction) for p in self._pipelines])
+            # If we get a downstream frame we process it in each source
+            await asyncio.gather(
+                *[wait_for_sync(s, self._down_queue, frame, direction) for s in self._sources]
+            )
 
         seen_ids = set()
         while not self._up_queue.empty():
