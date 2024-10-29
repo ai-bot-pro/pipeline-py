@@ -4,16 +4,16 @@ from asyncio import AbstractEventLoop
 import asyncio
 import unittest
 from apipeline.frames.control_frames import EndFrame
-from apipeline.pipeline.parallel_pipeline import ParallelPipeline
 from apipeline.pipeline.pipeline import Pipeline, FrameDirection
+from apipeline.pipeline.sync_parallel_pipeline import SyncParallelPipeline
 from apipeline.pipeline.task import PipelineTask, PipelineParams
 from apipeline.pipeline.runner import PipelineRunner
-from apipeline.frames.data_frames import Frame, TextFrame, ImageRawFrame, AudioRawFrame
+from apipeline.frames.data_frames import Frame, TextFrame
 from apipeline.processors.frame_processor import FrameProcessor
 
 
 """
-python -m unittest tests.test_parallel_pipeline.TestParallelPipeline
+python -m unittest tests.test_sync_parallel_pipeline.TestParallelPipeline
 """
 
 
@@ -50,7 +50,7 @@ class TestParallelPipeline(unittest.IsolatedAsyncioTestCase):
 
         pipeline = Pipeline([
             FrameTraceLogger(tag="0"),
-            ParallelPipeline(
+            SyncParallelPipeline(
                 [FrameTraceLogger(tag="1.0"), FrameTraceLogger(tag="1.1")],
                 [FrameTraceLogger(tag="2.0"), FrameTraceLogger(tag="2.1")],
             ),
@@ -68,7 +68,5 @@ class TestParallelPipeline(unittest.IsolatedAsyncioTestCase):
     async def test_run(self):
         runner = PipelineRunner()
         await self.task.queue_frame(TextFrame("你好"))
-        # await self.task.queue_frame(ImageRawFrame(image=bytes([]), size=(0, 0), format="PNG", mode="RGB"))
-        # await self.task.queue_frame(AudioRawFrame(audio=bytes([])))
         await self.task.queue_frame(EndFrame())
         await runner.run(self.task)
