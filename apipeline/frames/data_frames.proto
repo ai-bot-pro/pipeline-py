@@ -21,13 +21,16 @@ message AudioRawFrame {
   bytes audio = 3;
   uint32 sample_rate = 4;
   uint32 num_channels = 5;
+  uint32 sample_width = 6;
 }
 
 message ImageRawFrame {
-  bytes data = 1;
-  uint32 width = 2;
-  uint32 hight = 3;
-  string format = 4;
+  uint64 id = 1;
+  string name = 2;
+  bytes image = 3;
+  string size = 4; // "widthxheight"
+  string format = 5;
+  string mode = 6;
 }
 
 message Frame {
