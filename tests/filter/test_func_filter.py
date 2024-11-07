@@ -13,7 +13,7 @@ from apipeline.processors.logger import FrameLogger
 
 
 """
-python -m unittest tests.test_filter.TestFunctionFilter
+python -m unittest tests.filter.test_func_filter.TestFunctionFilter
 """
 
 

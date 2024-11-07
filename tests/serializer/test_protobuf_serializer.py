@@ -5,9 +5,9 @@ from apipeline.serializers.protobuf import ProtobufFrameSerializer
 
 
 """
-python -m unittest tests.test_protobuf_serializer.TestProtobufFrameSerializer.test_text
-python -m unittest tests.test_protobuf_serializer.TestProtobufFrameSerializer.test_audio
-python -m unittest tests.test_protobuf_serializer.TestProtobufFrameSerializer.test_image
+python -m unittest tests.serializer.test_protobuf_serializer.TestProtobufFrameSerializer.test_text
+python -m unittest tests.serializer.test_protobuf_serializer.TestProtobufFrameSerializer.test_audio
+python -m unittest tests.serializer.test_protobuf_serializer.TestProtobufFrameSerializer.test_image
 """
 
 
@@ -22,6 +22,7 @@ class TestProtobufFrameSerializer(unittest.IsolatedAsyncioTestCase):
     async def test_text(self):
         text_frame = TextFrame(text="hello world")
         frame = self.serializer.deserialize(self.serializer.serialize(text_frame))
+        print(frame)
         self.assertEqual(frame, text_frame)
 
     async def test_audio(self):
@@ -35,4 +36,5 @@ class TestProtobufFrameSerializer(unittest.IsolatedAsyncioTestCase):
             image=b"1234567890", size=(1280, 720), format="JPEG", mode="RGB",
         )
         frame = self.serializer.deserialize(self.serializer.serialize(image_frame))
+        print(frame)
         self.assertEqual(frame, image_frame)

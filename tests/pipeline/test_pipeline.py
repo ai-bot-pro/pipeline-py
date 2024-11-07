@@ -16,8 +16,8 @@ from apipeline.processors.output_processor import OutputFrameProcessor
 
 
 """
-python -m unittest tests.test_pipeline.TestSentenceAggregatorPipeline.test_pipeline_simple
-python -m unittest tests.test_pipeline.TestSentenceAggregatorPipeline.test_pipeline_multiple_stages
+python -m unittest tests.pipeline.test_pipeline.TestSentenceAggregatorPipeline.test_pipeline_simple
+python -m unittest tests.pipeline.test_pipeline.TestSentenceAggregatorPipeline.test_pipeline_multiple_stages
 """
 
 
