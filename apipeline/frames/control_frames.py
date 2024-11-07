@@ -37,3 +37,9 @@ class EndFrame(ControlFrame):
 class SyncFrame(ControlFrame):
     """This frame is used to know when the internal pipelines have finished."""
     pass
+
+
+@dataclass
+class SyncNotifyFrame(ControlFrame):
+    """This frame is used to know when notification has been received."""
+    pass
