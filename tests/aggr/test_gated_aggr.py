@@ -9,16 +9,18 @@ from apipeline.pipeline.pipeline import Pipeline
 from apipeline.pipeline.runner import PipelineRunner
 from apipeline.pipeline.task import PipelineParams, PipelineTask
 from apipeline.processors.aggregators.gated import GatedAggregator
-from apipeline.processors.aggregators.sentence import SentenceAggregator
-from apipeline.processors.frame_processor import FrameProcessor
-from apipeline.processors.text_transformer import StatelessTextTransformer
-from apipeline.processors.input_processor import InputFrameProcessor
-from apipeline.processors.output_processor import OutputFrameProcessor
+from apipeline.processors.output_processor import OutputProcessor
 
 
 """
 python -m unittest tests.aggr.test_gated_aggr.TestGatedAggregator
 """
+
+
+class PrintOutputProcessor(OutputProcessor):
+    async def sink(self, frame: DataFrame):
+        print(f"frame--->:{frame}")
+        self._sink_event.set()
 
 
 class TestGatedAggregator(unittest.IsolatedAsyncioTestCase):
@@ -50,8 +52,7 @@ class TestGatedAggregator(unittest.IsolatedAsyncioTestCase):
             gate_open_fn=lambda x: isinstance(x, ImageRawFrame),
             init_start_open=False,
         )
-        out_processor = OutputFrameProcessor(cb=lambda x: print(f"sink_callback print frame: {x}"))
-        pipeline = Pipeline([aggregator, out_processor])
+        pipeline = Pipeline([aggregator, PrintOutputProcessor()])
         task = PipelineTask(pipeline, PipelineParams())
 
         await task.queue_frame(TextFrame("Hello, "))
@@ -70,6 +71,7 @@ class TestGatedAggregator(unittest.IsolatedAsyncioTestCase):
             format="JPEG",
             mode="RGB",
         ))
+        await task.queue_frame(TextFrame("Goodbye3."))
         await task.queue_frame(EndFrame())
 
         runner = PipelineRunner()
