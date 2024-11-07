@@ -13,7 +13,7 @@ from apipeline.processors.frame_processor import FrameProcessor
 
 
 """
-python -m unittest tests.test_parallel_pipeline.TestParallelPipeline
+python -m unittest tests.pipeline.test_parallel_pipeline.TestParallelPipeline
 """
 
 
