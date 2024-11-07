@@ -109,7 +109,7 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         while running:
             try:
                 frame = await self._sink_queue.get()
-                # print(f"_sink_queue.get: {frame}")
+                print(f"_sink_queue.get: {frame}")
                 # sink data frame
                 if isinstance(frame, DataFrame):
                     await self.sink(frame)

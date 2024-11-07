@@ -46,14 +46,6 @@ class UserIdleProcessor(AsyncFrameProcessor):
         else:
             await self.queue_frame(frame, direction)
 
-        # We shouldn't call the idle callback if the user or the bot are speaking.
-        if isinstance(frame, StartInterruptionFrame):
-            self._interrupted = True
-            self._idle_event.set()
-        elif isinstance(frame, StopInterruptionFrame):
-            self._interrupted = False
-            self._idle_event.set()
-
     async def cleanup(self):
         self._idle_task.cancel()
         await self._idle_task
