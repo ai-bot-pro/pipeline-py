@@ -52,7 +52,6 @@ class TestAggregator(unittest.IsolatedAsyncioTestCase):
             handlers=[
                 logging.StreamHandler()],
         )
-        pass
 
     @classmethod
     def tearDownClass(cls):
@@ -120,13 +119,14 @@ class TestAggregator(unittest.IsolatedAsyncioTestCase):
         )
         pipeline = Pipeline([
             aggregator,
-            user_idle,
-            # FunctionFilter(filter=self.wake_notifier_filter),
+            # user_idle,
+            FunctionFilter(filter=self.wake_notifier_filter),
             PrintOutFrameProcessor(),
         ])
         task = PipelineTask(pipeline, PipelineParams())
 
         await task.queue_frame(TextFrame("Hello last one frame, "))
+        await task.queue_frame(SyncNotifyFrame())
         await task.queue_frame(ImageRawFrame(
             image=bytes([]),
             size=(0, 0),
@@ -142,8 +142,8 @@ class TestAggregator(unittest.IsolatedAsyncioTestCase):
         ))
         # await task.queue_frame(EndFrame())
         await task.queue_frame(TextFrame("end"))
-        # await task.queue_frame(TextFrame("endTask"))
-        # await task.queue_frame(StopTaskFrame())
+        await task.queue_frame(TextFrame("endTask"))
+        await task.queue_frame(StopTaskFrame())
 
         runner = PipelineRunner()
         await asyncio.gather(runner.run(task))

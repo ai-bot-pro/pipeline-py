@@ -95,7 +95,7 @@ class HoldLastFrameAggregator(AsyncFrameProcessor):
             try:
                 await self._notifier.wait()
                 if self._hold_last_frame:
-                    await self.push_frame(self._hold_last_frame)
+                    await self.queue_frame(self._hold_last_frame)
                 self._hold_last_frame = None
             except asyncio.CancelledError:
                 break
