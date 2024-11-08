@@ -76,8 +76,8 @@ class TestAggregator(unittest.IsolatedAsyncioTestCase):
         user_idle = UserIdleProcessor(callback=idle_callback, timeout=1.0)
 
         aggregator = HoldFramesAggregator(
-            hold_frame_classes=(TextFrame,),
             notifier=self._notifier,
+            hold_frame_classes=(TextFrame,),
         )
         pipeline = Pipeline([
             aggregator,
@@ -115,8 +115,8 @@ class TestAggregator(unittest.IsolatedAsyncioTestCase):
         user_idle = UserIdleProcessor(callback=idle_callback, timeout=1.0)
 
         aggregator = HoldLastFrameAggregator(
-            hold_frame_classes=(TextFrame,),
             notifier=self._notifier,
+            hold_frame_classes=(TextFrame,),
         )
         pipeline = Pipeline([
             aggregator,
