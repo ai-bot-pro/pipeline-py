@@ -5,6 +5,7 @@
 #
 
 import asyncio
+import logging
 
 from apipeline.frames.sys_frames import Frame, StartInterruptionFrame
 from apipeline.frames.control_frames import EndFrame
@@ -21,6 +22,7 @@ class AsyncFrameProcessor(FrameProcessor):
             **kwargs):
         super().__init__(name=name, loop=loop, **kwargs)
 
+        self._push_frame_task = None
         # Create push frame task. This is the task that will push frames in
         # order. We also guarantee that all frames are pushed in the same task.
         self._create_push_task()
@@ -34,6 +36,8 @@ class AsyncFrameProcessor(FrameProcessor):
     async def cleanup(self):
         self._push_frame_task.cancel()
         await self._push_frame_task
+        self._push_frame_task = None
+        logging.info(f"{self} Cleaned up")
 
     #
     # Handle interruptions
@@ -42,19 +46,23 @@ class AsyncFrameProcessor(FrameProcessor):
         # Cancel the task. This will stop pushing frames downstream.
         self._push_frame_task.cancel()
         await self._push_frame_task
+        self._push_frame_task = None
         # Push an out-of-band frame (i.e. not using the ordered push
         # frame task).
         await self.push_frame(frame)
         # Create a new queue and task.
         self._create_push_task()
+        logging.info(f"{self} Handle interruption")
 
     #
     # Push frames task
     #
 
     def _create_push_task(self):
-        self._push_queue = asyncio.Queue()
-        self._push_frame_task = self.get_event_loop().create_task(self._push_frame_task_handler())
+        if not self._push_frame_task:
+            self._push_queue = asyncio.Queue()
+            self._push_frame_task = self.get_event_loop().create_task(self._push_frame_task_handler())
+            logging.info(f"{self} Create queue frame task")
 
     async def queue_frame(
             self,
