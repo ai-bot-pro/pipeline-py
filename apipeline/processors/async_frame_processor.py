@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: BSD 2-Clause License
 #
 
-import asyncio
 import logging
+import asyncio
 
 from apipeline.frames.sys_frames import Frame, StartInterruptionFrame
 from apipeline.frames.control_frames import EndFrame
@@ -34,10 +34,9 @@ class AsyncFrameProcessor(FrameProcessor):
             await self._handle_interruptions(frame)
 
     async def cleanup(self):
-        self._push_frame_task.cancel()
-        await self._push_frame_task
-        self._push_frame_task = None
-        logging.info(f"{self} Cleaned up")
+        if self._push_frame_task:
+            self._push_frame_task.cancel()
+            await self._push_frame_task
 
     #
     # Handle interruptions
@@ -52,17 +51,18 @@ class AsyncFrameProcessor(FrameProcessor):
         await self.push_frame(frame)
         # Create a new queue and task.
         self._create_push_task()
-        logging.info(f"{self} Handle interruption")
 
     #
     # Push frames task
     #
 
     def _create_push_task(self):
-        if not self._push_frame_task:
-            self._push_queue = asyncio.Queue()
-            self._push_frame_task = self.get_event_loop().create_task(self._push_frame_task_handler())
-            logging.info(f"{self} Create queue frame task")
+        """
+        NOTE: all async frame processors must have create a new queue and task, don't to check task is None
+        """
+        # logging.debug(f"{self} create push task {self._push_frame_task}")
+        self._push_queue = asyncio.Queue()
+        self._push_frame_task = self.get_event_loop().create_task(self._push_frame_task_handler())
 
     async def queue_frame(
             self,
