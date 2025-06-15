@@ -15,10 +15,13 @@ class ControlFrame(Frame):
 @dataclass
 class StartFrame(ControlFrame):
     """This is the first frame that should be pushed down a pipeline."""
+
     allow_interruptions: bool = False
     enable_metrics: bool = False
     enable_usage_metrics: bool = False
     report_only_initial_ttfb: bool = False
+    audio_in_sample_rate: int = 16000
+    audio_out_sample_rate: int = 24000
 
 
 @dataclass
@@ -30,16 +33,19 @@ class EndFrame(ControlFrame):
     was sent (unline system frames).
 
     """
+
     pass
 
 
 @dataclass
 class SyncFrame(ControlFrame):
     """This frame is used to know when the internal pipelines have finished."""
+
     pass
 
 
 @dataclass
 class SyncNotifyFrame(ControlFrame):
     """This frame is used to know when notification has been received."""
+
     pass

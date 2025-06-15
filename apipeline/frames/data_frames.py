@@ -38,7 +38,7 @@ class AudioRawFrame(DataFrame):
         self.num_frames = int(len(self.audio) / (self.num_channels * self.sample_width))
 
     def __str__(self):
-        return f"{self.name}(size: {len(self.audio)}, frames: {self.num_frames}, sample_rate: {self.sample_rate},sample_width: {self.sample_width}, channels: {self.num_channels})"
+        return f"{self.name}(size: {len(self.audio)}, frames: {self.num_frames}, sample_rate: {self.sample_rate}, sample_width: {self.sample_width}, channels: {self.num_channels})"
 
 
 @dataclass
