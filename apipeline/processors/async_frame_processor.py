@@ -83,3 +83,6 @@ class AsyncFrameProcessor(FrameProcessor):
                 running = not isinstance(frame, EndFrame)
             except asyncio.CancelledError:
                 break
+            except Exception as ex:
+                logging.exception(f"{self.name} Unexpected error in _push_frame_task_handler: {ex}")
+                continue
