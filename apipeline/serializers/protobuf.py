@@ -49,7 +49,7 @@ class ProtobufFrameSerializer(FrameSerializer):
         >>> serializer = ProtobufFrameSerializer()
         >>> serializer.deserialize(
         ...     serializer.serialize(OutputAudioFrame(data=b'1234567890')))
-        InputAudioFrame(data=b'1234567890')
+        OutputAudioFrame(data=b'1234567890')
 
         >>> serializer.deserialize(
         ...     serializer.serialize(TextFrame(text='hello world')))

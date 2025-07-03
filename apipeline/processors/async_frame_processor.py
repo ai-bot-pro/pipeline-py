@@ -74,6 +74,10 @@ class AsyncFrameProcessor(FrameProcessor):
         running = True
         while running:
             try:
+                if self.get_event_loop().is_closed():
+                    logging.warning(f"{self.name} event loop is closed")
+                    break
+
                 (frame, direction) = await self._push_queue.get()
                 await self.push_frame(frame, direction)
                 running = not isinstance(frame, EndFrame)

@@ -108,6 +108,10 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         running = True
         while running:
             try:
+                if self.get_event_loop().is_closed():
+                    logging.warning(f"{self.name} event loop is closed")
+                    break
+
                 frame = await self._sink_queue.get()
                 # print(f"_sink_queue.get: {frame}")
                 # sink data frame
@@ -187,6 +191,10 @@ class OutputFrameProcessor(OutputProcessor):
     async def _out_push_task_handler(self):
         while self._running:
             try:
+                if self.get_event_loop().is_closed():
+                    logging.warning(f"{self.name} event loop is closed")
+                    break
+
                 frame = await asyncio.wait_for(self._out_queue.get(), 0.1)
                 # print(f"_out_queue.get: {frame}")
                 if asyncio.iscoroutinefunction(self._cb):
