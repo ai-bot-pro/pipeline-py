@@ -13,13 +13,9 @@ from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 
 
 class AsyncFrameProcessor(FrameProcessor):
-
     def __init__(
-            self,
-            *,
-            name: str | None = None,
-            loop: asyncio.AbstractEventLoop | None = None,
-            **kwargs):
+        self, *, name: str | None = None, loop: asyncio.AbstractEventLoop | None = None, **kwargs
+    ):
         super().__init__(name=name, loop=loop, **kwargs)
 
         self._push_frame_task = None
@@ -65,9 +61,8 @@ class AsyncFrameProcessor(FrameProcessor):
         self._push_frame_task = self.get_event_loop().create_task(self._push_frame_task_handler())
 
     async def queue_frame(
-            self,
-            frame: Frame,
-            direction: FrameDirection = FrameDirection.DOWNSTREAM):
+        self, frame: Frame, direction: FrameDirection = FrameDirection.DOWNSTREAM
+    ):
         await self._push_queue.put((frame, direction))
 
     async def _push_frame_task_handler(self):

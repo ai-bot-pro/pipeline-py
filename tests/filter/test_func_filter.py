@@ -19,13 +19,14 @@ python -m unittest tests.filter.test_func_filter.TestFunctionFilter
 
 class CheckFilter(FrameProcessor):
     def __init__(
-            self,
-            text: str | None = None,
-            check_img: bool = False,
-            *,
-            name: str | None = None,
-            loop: AbstractEventLoop | None = None,
-            **kwargs):
+        self,
+        text: str | None = None,
+        check_img: bool = False,
+        *,
+        name: str | None = None,
+        loop: AbstractEventLoop | None = None,
+        **kwargs,
+    ):
         super().__init__(name=name, loop=loop, **kwargs)
         self._text = text
         self._check_img = check_img
@@ -56,19 +57,18 @@ class TestFunctionFilter(unittest.IsolatedAsyncioTestCase):
         logging.basicConfig(level="INFO")
         self.text = "你好"
 
-        pipeline = Pipeline([
-            FrameLogger(),
-            FunctionFilter(filter=self.text_filter),
-            CheckFilter(text=self.text),
-            FunctionFilter(filter=self.image_filter),
-            CheckFilter(text=self.text, check_img=True),
-            FrameLogger(),
-        ])
-
-        self.task = PipelineTask(
-            pipeline,
-            PipelineParams()
+        pipeline = Pipeline(
+            [
+                FrameLogger(),
+                FunctionFilter(filter=self.text_filter),
+                CheckFilter(text=self.text),
+                FunctionFilter(filter=self.image_filter),
+                CheckFilter(text=self.text, check_img=True),
+                FrameLogger(),
+            ]
         )
+
+        self.task = PipelineTask(pipeline, PipelineParams())
 
     async def asyncTearDown(self):
         pass
@@ -77,7 +77,9 @@ class TestFunctionFilter(unittest.IsolatedAsyncioTestCase):
         runner = PipelineRunner()
         await self.task.queue_frame(TextFrame(self.text))
         await self.task.queue_frame(TextFrame("你好!"))
-        await self.task.queue_frame(ImageRawFrame(image=bytes([]), size=(0, 0), format="PNG", mode="RGB"))
+        await self.task.queue_frame(
+            ImageRawFrame(image=bytes([]), size=(0, 0), format="PNG", mode="RGB")
+        )
         await self.task.queue_frame(AudioRawFrame(audio=bytes([])))
         await self.task.queue_frame(EndFrame())
         await runner.run(self.task)

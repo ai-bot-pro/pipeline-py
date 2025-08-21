@@ -4,7 +4,13 @@ from abc import ABC, abstractmethod
 
 from apipeline.frames.base import Frame
 from apipeline.frames.data_frames import DataFrame
-from apipeline.frames.sys_frames import CancelFrame, MetricsFrame, StartInterruptionFrame, StopInterruptionFrame, SystemFrame
+from apipeline.frames.sys_frames import (
+    CancelFrame,
+    MetricsFrame,
+    StartInterruptionFrame,
+    StopInterruptionFrame,
+    SystemFrame,
+)
 from apipeline.frames.control_frames import ControlFrame, EndFrame, StartFrame
 from apipeline.processors.async_frame_processor import AsyncFrameProcessor
 from apipeline.processors.frame_processor import FrameDirection
@@ -17,11 +23,8 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
     """
 
     def __init__(
-            self,
-            *,
-            name: str | None = None,
-            loop: asyncio.AbstractEventLoop | None = None,
-            **kwargs):
+        self, *, name: str | None = None, loop: asyncio.AbstractEventLoop | None = None, **kwargs
+    ):
         super().__init__(name=name, loop=loop, **kwargs)
 
         self._stopped_event = asyncio.Event()
@@ -147,8 +150,7 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         """
         flow stream to control frame start, end, e.g. until await task future is finished
         """
-        logging.debug(
-            f"{self.__class__.__name__} process_control_frame {frame} doing")
+        logging.debug(f"{self.__class__.__name__} process_control_frame {frame} doing")
         await self.queue_frame(frame)
 
 
@@ -159,8 +161,14 @@ class OutputFrameProcessor(OutputProcessor):
     else user can get the out_queue to consume;
     """
 
-    def __init__(self, *, cb=None, name: str | None = None,
-                 loop: asyncio.AbstractEventLoop | None = None, **kwargs):
+    def __init__(
+        self,
+        *,
+        cb=None,
+        name: str | None = None,
+        loop: asyncio.AbstractEventLoop | None = None,
+        **kwargs,
+    ):
         super().__init__(name=name, loop=loop, **kwargs)
         self._out_queue = asyncio.Queue()
         self._cb = cb

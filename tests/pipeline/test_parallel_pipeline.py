@@ -18,21 +18,15 @@ python -m unittest tests.pipeline.test_parallel_pipeline.TestParallelPipeline
 
 
 class FrameTraceLogger(FrameProcessor):
-
     def __init__(
-            self,
-            tag: str,
-            *,
-            name: str | None = None,
-            loop: AbstractEventLoop | None = None,
-            **kwargs):
+        self, tag: str, *, name: str | None = None, loop: AbstractEventLoop | None = None, **kwargs
+    ):
         super().__init__(name=name, loop=loop, **kwargs)
         self._tag = tag
 
     async def process_frame(
-            self,
-            frame: Frame,
-            direction: FrameDirection = FrameDirection.DOWNSTREAM):
+        self, frame: Frame, direction: FrameDirection = FrameDirection.DOWNSTREAM
+    ):
         await super().process_frame(frame, direction)
 
         from_to = f"{self._prev} ---> {self}"
@@ -48,19 +42,18 @@ class TestParallelPipeline(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-        pipeline = Pipeline([
-            FrameTraceLogger(tag="0"),
-            ParallelPipeline(
-                [FrameTraceLogger(tag="1.0"), FrameTraceLogger(tag="1.1")],
-                [FrameTraceLogger(tag="2.0"), FrameTraceLogger(tag="2.1")],
-            ),
-            FrameTraceLogger(tag="3"),
-        ])
-
-        self.task = PipelineTask(
-            pipeline,
-            PipelineParams()
+        pipeline = Pipeline(
+            [
+                FrameTraceLogger(tag="0"),
+                ParallelPipeline(
+                    [FrameTraceLogger(tag="1.0"), FrameTraceLogger(tag="1.1")],
+                    [FrameTraceLogger(tag="2.0"), FrameTraceLogger(tag="2.1")],
+                ),
+                FrameTraceLogger(tag="3"),
+            ]
         )
+
+        self.task = PipelineTask(pipeline, PipelineParams())
 
     async def asyncTearDown(self):
         pass

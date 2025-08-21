@@ -8,7 +8,12 @@ from typing import Awaitable, Callable
 import asyncio
 
 
-from apipeline.frames.sys_frames import Frame, StartInterruptionFrame, StopInterruptionFrame, SystemFrame
+from apipeline.frames.sys_frames import (
+    Frame,
+    StartInterruptionFrame,
+    StopInterruptionFrame,
+    SystemFrame,
+)
 from apipeline.processors.async_frame_processor import AsyncFrameProcessor
 from apipeline.processors.frame_processor import FrameDirection
 
@@ -24,11 +29,12 @@ class UserIdleProcessor(AsyncFrameProcessor):
     """
 
     def __init__(
-            self,
-            *,
-            callback: Callable[["UserIdleProcessor"], Awaitable[None]],
-            timeout: float,
-            **kwargs):
+        self,
+        *,
+        callback: Callable[["UserIdleProcessor"], Awaitable[None]],
+        timeout: float,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
 
         self._callback = callback

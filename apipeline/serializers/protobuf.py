@@ -29,14 +29,15 @@ class ProtobufFrameSerializer(FrameSerializer):
             if not value:
                 continue
 
-            if (isinstance(frame, ImageRawFrame) and field.name == "size"
-                    and isinstance(value, tuple) and len(value) == 2):
+            if (
+                isinstance(frame, ImageRawFrame)
+                and field.name == "size"
+                and isinstance(value, tuple)
+                and len(value) == 2
+            ):
                 setattr(
-                    getattr(
-                        proto_frame,
-                        proto_optional_name),
-                    field.name,
-                    f"{value[0]}x{value[1]}")
+                    getattr(proto_frame, proto_optional_name), field.name, f"{value[0]}x{value[1]}"
+                )
             else:
                 setattr(getattr(proto_frame, proto_optional_name), field.name, value)
 

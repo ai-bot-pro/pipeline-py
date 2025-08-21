@@ -17,6 +17,7 @@ class SystemFrame(Frame):
 @dataclass
 class CancelFrame(SystemFrame):
     """Indicates that a pipeline needs to stop right away."""
+
     pass
 
 
@@ -24,6 +25,7 @@ class CancelFrame(SystemFrame):
 class ErrorFrame(SystemFrame):
     """This is used notify upstream that an error has occurred downstream the
     pipeline."""
+
     error: str
     fatal: bool = False
 
@@ -38,6 +40,7 @@ class StopTaskFrame(SystemFrame):
     the pipeline task.
 
     """
+
     pass
 
 
@@ -49,6 +52,7 @@ class StartInterruptionFrame(SystemFrame):
     guaranteed).
 
     """
+
     pass
 
 
@@ -60,13 +64,14 @@ class StopInterruptionFrame(SystemFrame):
     guaranteed).
 
     """
+
     pass
 
 
 @dataclass
 class MetricsFrame(SystemFrame):
-    """Emitted by processor that can compute metrics like latencies.
-    """
+    """Emitted by processor that can compute metrics like latencies."""
+
     ttfb: List[Mapping[str, Any]] | None = None
     processing: List[Mapping[str, Any]] | None = None
     tokens: List[Mapping[str, Any]] | None = None

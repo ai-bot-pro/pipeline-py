@@ -29,4 +29,3 @@ def obj_count(obj) -> int:
         else:
             _COUNTS[name] += 1
         return _COUNTS[name]
-

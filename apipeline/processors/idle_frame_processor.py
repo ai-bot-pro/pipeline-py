@@ -23,12 +23,13 @@ class IdleFrameProcessor(AsyncFrameProcessor):
     """
 
     def __init__(
-            self,
-            *,
-            callback: Callable[["IdleFrameProcessor"], Awaitable[None]],
-            timeout: float,
-            types: List[type] = [],
-            **kwargs):
+        self,
+        *,
+        callback: Callable[["IdleFrameProcessor"], Awaitable[None]],
+        timeout: float,
+        types: List[type] = [],
+        **kwargs,
+    ):
         super().__init__(**kwargs)
 
         self._callback = callback
@@ -55,6 +56,7 @@ class IdleFrameProcessor(AsyncFrameProcessor):
                     self._idle_event.set()
 
         # If we are not waiting for any specific frame set the event, otherwise
+
     async def cleanup(self):
         self._idle_task.cancel()
         await self._idle_task

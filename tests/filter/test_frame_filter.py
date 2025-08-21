@@ -20,13 +20,14 @@ python -m unittest tests.filter.test_frame_filter.TestFilter
 
 class CheckFilter(FrameProcessor):
     def __init__(
-            self,
-            text: str | None = None,
-            check_img: bool = False,
-            *,
-            name: str | None = None,
-            loop: AbstractEventLoop | None = None,
-            **kwargs):
+        self,
+        text: str | None = None,
+        check_img: bool = False,
+        *,
+        name: str | None = None,
+        loop: AbstractEventLoop | None = None,
+        **kwargs,
+    ):
         super().__init__(name=name, loop=loop, **kwargs)
         self._text = text
         self._check_img = check_img
@@ -42,32 +43,27 @@ class CheckFilter(FrameProcessor):
 
 
 class TestFilter(unittest.IsolatedAsyncioTestCase):
-
     async def asyncSetUp(self):
         logging.basicConfig(
-            level=os.getenv(
-                "LOG_LEVEL",
-                "info").upper(),
-            format='%(asctime)s - %(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(funcName)s - %(message)s',
-            handlers=[
-                logging.StreamHandler()],
+            level=os.getenv("LOG_LEVEL", "info").upper(),
+            format="%(asctime)s - %(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(funcName)s - %(message)s",
+            handlers=[logging.StreamHandler()],
         )
         self.text = "你好"
 
-        pipeline = Pipeline([
-            # FrameLogger(include_frame_types=[TextFrame]),
-            FrameFilter(include_frame_types=[TextFrame]),
-            # FrameLogger(),
-            CheckFilter(text=self.text),
-            FrameFilter(include_frame_types=[ImageRawFrame]),
-            FrameLogger(),
-            CheckFilter(text=self.text, check_img=True),
-        ])
-
-        self.task = PipelineTask(
-            pipeline,
-            PipelineParams()
+        pipeline = Pipeline(
+            [
+                # FrameLogger(include_frame_types=[TextFrame]),
+                FrameFilter(include_frame_types=[TextFrame]),
+                # FrameLogger(),
+                CheckFilter(text=self.text),
+                FrameFilter(include_frame_types=[ImageRawFrame]),
+                FrameLogger(),
+                CheckFilter(text=self.text, check_img=True),
+            ]
         )
+
+        self.task = PipelineTask(pipeline, PipelineParams())
 
     async def asyncTearDown(self):
         pass
@@ -76,7 +72,9 @@ class TestFilter(unittest.IsolatedAsyncioTestCase):
         runner = PipelineRunner()
         await self.task.queue_frame(TextFrame(self.text))
         await self.task.queue_frame(TextFrame("你好!"))
-        await self.task.queue_frame(ImageRawFrame(image=bytes([]), size=(0, 0), format="PNG", mode="RGB"))
+        await self.task.queue_frame(
+            ImageRawFrame(image=bytes([]), size=(0, 0), format="PNG", mode="RGB")
+        )
         await self.task.queue_frame(AudioRawFrame(audio=bytes([])))
         await self.task.queue_frame(EndFrame())
         await runner.run(self.task)

@@ -13,10 +13,7 @@ class HoldFramesAggregator(AsyncFrameProcessor):
     it doesn't let the frames through until the notifier is notified.
     """
 
-    def __init__(self,
-                 notifier: BaseNotifier,
-                 hold_frame_classes: tuple[Type[Frame]],
-                 **kwargs):
+    def __init__(self, notifier: BaseNotifier, hold_frame_classes: tuple[Type[Frame]], **kwargs):
         super().__init__(**kwargs)
         self._notifier = notifier
         self._hold_frame_classes = hold_frame_classes
@@ -60,10 +57,7 @@ class HoldLastFrameAggregator(AsyncFrameProcessor):
     it doesn't let the frame through until the notifier is notified.
     """
 
-    def __init__(self,
-                 notifier: BaseNotifier,
-                 hold_frame_classes: tuple[Type[Frame]],
-                 **kwargs):
+    def __init__(self, notifier: BaseNotifier, hold_frame_classes: tuple[Type[Frame]], **kwargs):
         super().__init__(**kwargs)
         self._notifier = notifier
         self._hold_frame_classes = hold_frame_classes

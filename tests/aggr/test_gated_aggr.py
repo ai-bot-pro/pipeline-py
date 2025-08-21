@@ -27,12 +27,9 @@ class TestGatedAggregator(unittest.IsolatedAsyncioTestCase):
     @classmethod
     def setUpClass(cls):
         logging.basicConfig(
-            level=os.getenv(
-                "LOG_LEVEL",
-                "info").upper(),
-            format='%(asctime)s - %(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(funcName)s - %(message)s',
-            handlers=[
-                logging.StreamHandler()],
+            level=os.getenv("LOG_LEVEL", "info").upper(),
+            format="%(asctime)s - %(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(funcName)s - %(message)s",
+            handlers=[logging.StreamHandler()],
         )
         pass
 
@@ -57,20 +54,24 @@ class TestGatedAggregator(unittest.IsolatedAsyncioTestCase):
 
         await task.queue_frame(TextFrame("Hello, "))
         await task.queue_frame(TextFrame("Hello again."))
-        await task.queue_frame(ImageRawFrame(
-            image=bytes([]),
-            size=(0, 0),
-            format="JPEG",
-            mode="RGB",
-        ))
+        await task.queue_frame(
+            ImageRawFrame(
+                image=bytes([]),
+                size=(0, 0),
+                format="JPEG",
+                mode="RGB",
+            )
+        )
         await task.queue_frame(TextFrame("Goodbye1."))
         await task.queue_frame(TextFrame("Goodbye2."))
-        await task.queue_frame(ImageRawFrame(
-            image=bytes([]),
-            size=(0, 0),
-            format="JPEG",
-            mode="RGB",
-        ))
+        await task.queue_frame(
+            ImageRawFrame(
+                image=bytes([]),
+                size=(0, 0),
+                format="JPEG",
+                mode="RGB",
+            )
+        )
         await task.queue_frame(TextFrame("Goodbye3."))
         await task.queue_frame(EndFrame())
 

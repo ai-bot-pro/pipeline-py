@@ -47,6 +47,7 @@ class TestSentenceAggregatorPipeline(unittest.IsolatedAsyncioTestCase):
             self.text.append(frame.text)
             # note: if assert false, wait for a while
             # self.assertEqual(frame.text, 'Hello, world.')
+
         out_processor = OutputFrameProcessor(cb=sink_callback)
         # out_processor = OutputFrameProcessor(cb=lambda x: print(f"sink_callback print frame: {x}"))
 
@@ -68,6 +69,7 @@ class TestSentenceAggregatorPipeline(unittest.IsolatedAsyncioTestCase):
 
         def to_upper(x: str):
             return x.upper()
+
         to_upper_processor = StatelessTextTransformer(to_upper)
         add_space_processor = StatelessTextTransformer(lambda x: x + " ")
 
@@ -76,14 +78,17 @@ class TestSentenceAggregatorPipeline(unittest.IsolatedAsyncioTestCase):
         async def sink_callback(frame: DataFrame):
             print(f"sink_callback print frame: {frame}")
             self.text.append(frame.text)
+
         out_processor = OutputFrameProcessor(cb=sink_callback)
 
-        pipeline = Pipeline([
-            add_space_processor,
-            sentence_aggregator,
-            to_upper_processor,
-            out_processor,
-        ])
+        pipeline = Pipeline(
+            [
+                add_space_processor,
+                sentence_aggregator,
+                to_upper_processor,
+                out_processor,
+            ]
+        )
         task = PipelineTask(pipeline, PipelineParams(allow_interruptions=True))
 
         sentence = "Hello, world. It's me, a pipeline."
@@ -96,7 +101,10 @@ class TestSentenceAggregatorPipeline(unittest.IsolatedAsyncioTestCase):
         await asyncio.gather(runner.run(task))
 
         print(self.text)
-        self.assertEqual(self.text, [
-            "H E L L O ,   W O R L D . ",
-            "  I T ' S   M E ,   A   P I P E L I N E . ",
-        ])
+        self.assertEqual(
+            self.text,
+            [
+                "H E L L O ,   W O R L D . ",
+                "  I T ' S   M E ,   A   P I P E L I N E . ",
+            ],
+        )

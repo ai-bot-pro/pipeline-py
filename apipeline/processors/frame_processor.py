@@ -38,10 +38,7 @@ class FrameProcessorMetrics:
 
         value = time.time() - self._start_ttfb_time
         logging.debug(f"{self._name} TTFB: {value}")
-        ttfb = {
-            "processor": self._name,
-            "value": value
-        }
+        ttfb = {"processor": self._name, "value": value}
         self._start_ttfb_time = 0
         return MetricsFrame(ttfb=[ttfb])
 
@@ -54,22 +51,15 @@ class FrameProcessorMetrics:
 
         value = time.time() - self._start_processing_time
         logging.debug(f"{self._name} processing time: {value}")
-        processing = {
-            "processor": self._name,
-            "value": value
-        }
+        processing = {"processor": self._name, "value": value}
         self._start_processing_time = 0
         return MetricsFrame(processing=[processing])
 
 
 class FrameProcessor:
-
     def __init__(
-            self,
-            *,
-            name: str | None = None,
-            loop: asyncio.AbstractEventLoop | None = None,
-            **kwargs):
+        self, *, name: str | None = None, loop: asyncio.AbstractEventLoop | None = None, **kwargs
+    ):
         self.id: int = obj_id()
         self.name = name or f"{self.__class__.__name__}#{obj_count(self)}"
         self._parent_pipeline: "FrameProcessor" | None = None

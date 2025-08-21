@@ -6,7 +6,7 @@ setup(
     description="Python pipeline with asyncio support",
     long_description=open("README.md").read().strip(),
     long_description_content_type="text/markdown",
-    version="0.2.2",
+    version="0.2.3",
     license="BSD 3-Clause",
     url="https://github.com/weedge/pipeline-py",
     author="weedge",
@@ -16,7 +16,7 @@ setup(
         include=[
             "apipeline.*",
         ],
-        exclude=["*~"]
+        exclude=["*~"],
     ),
     include_package_data=True,
     install_requires=["pydantic >= 2.8.2"],

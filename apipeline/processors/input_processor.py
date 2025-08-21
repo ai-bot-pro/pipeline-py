@@ -25,17 +25,20 @@ class InputProcessor(AsyncFrameProcessor):
 
     async def process_sys_frame(self, frame: Frame, direction: FrameDirection):
         logging.debug(
-            f"f{self.__class__.__name__} process_sys_frame {frame} direction:{direction} doing")
+            f"f{self.__class__.__name__} process_sys_frame {frame} direction:{direction} doing"
+        )
         await self.queue_frame(frame, direction)
 
     async def process_control_frame(self, frame: Frame, direction: FrameDirection):
         logging.debug(
-            f"f{self.__class__.__name__} process_control_frame {frame} direction:{direction} doing")
+            f"f{self.__class__.__name__} process_control_frame {frame} direction:{direction} doing"
+        )
         await self.queue_frame(frame, direction)
 
     async def process_data_frame(self, frame: Frame, direction: FrameDirection):
         logging.debug(
-            f"f{self.__class__.__name__} process_data_frame {frame} direction:{direction} doing")
+            f"f{self.__class__.__name__} process_data_frame {frame} direction:{direction} doing"
+        )
         await self.queue_frame(frame, direction)
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
@@ -75,8 +78,14 @@ class InputFrameProcessor(InputProcessor):
     WARNNING: dont to use it if use pipeline task, just use pipeline task queue_frame to input frame
     """
 
-    def __init__(self, *, in_queue: asyncio.Queue | None = None, name: str | None = None,
-                 loop: asyncio.AbstractEventLoop | None = None, **kwargs):
+    def __init__(
+        self,
+        *,
+        in_queue: asyncio.Queue | None = None,
+        name: str | None = None,
+        loop: asyncio.AbstractEventLoop | None = None,
+        **kwargs,
+    ):
         super().__init__(name=name, loop=loop, **kwargs)
         if in_queue is not None:
             self._in_queue = in_queue

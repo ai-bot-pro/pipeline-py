@@ -45,12 +45,9 @@ class TestAggregator(unittest.IsolatedAsyncioTestCase):
     @classmethod
     def setUpClass(cls):
         logging.basicConfig(
-            level=os.getenv(
-                "LOG_LEVEL",
-                "info").upper(),
-            format='%(asctime)s - %(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(funcName)s - %(message)s',
-            handlers=[
-                logging.StreamHandler()],
+            level=os.getenv("LOG_LEVEL", "info").upper(),
+            format="%(asctime)s - %(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(funcName)s - %(message)s",
+            handlers=[logging.StreamHandler()],
         )
 
     @classmethod
@@ -72,35 +69,42 @@ class TestAggregator(unittest.IsolatedAsyncioTestCase):
     async def test_hold_frames_print(self):
         async def idle_callback(processor: UserIdleProcessor):
             await self._notifier.notify()
+
         user_idle = UserIdleProcessor(callback=idle_callback, timeout=1.0)
 
         aggregator = HoldFramesAggregator(
             notifier=self._notifier,
             hold_frame_classes=(TextFrame,),
         )
-        pipeline = Pipeline([
-            aggregator,
-            # user_idle,
-            FunctionFilter(filter=self.wake_notifier_filter),
-            PrintOutFrameProcessor(),
-        ])
+        pipeline = Pipeline(
+            [
+                aggregator,
+                # user_idle,
+                FunctionFilter(filter=self.wake_notifier_filter),
+                PrintOutFrameProcessor(),
+            ]
+        )
         task = PipelineTask(pipeline, PipelineParams())
 
         await task.queue_frame(TextFrame("Hello many frames, "))
         await task.queue_frame(SyncNotifyFrame())
-        await task.queue_frame(ImageRawFrame(
-            image=bytes([]),
-            size=(0, 0),
-            format="JPEG",
-            mode="RGB",
-        ))
+        await task.queue_frame(
+            ImageRawFrame(
+                image=bytes([]),
+                size=(0, 0),
+                format="JPEG",
+                mode="RGB",
+            )
+        )
         await task.queue_frame(TextFrame("Goodbye1."))
-        await task.queue_frame(ImageRawFrame(
-            image=bytes([]),
-            size=(0, 0),
-            format="PNG",
-            mode="RGB",
-        ))
+        await task.queue_frame(
+            ImageRawFrame(
+                image=bytes([]),
+                size=(0, 0),
+                format="PNG",
+                mode="RGB",
+            )
+        )
         # await task.queue_frame(EndFrame())
         # await task.queue_frame(TextFrame("end"))
         await task.queue_frame(StopTaskFrame())
@@ -111,35 +115,42 @@ class TestAggregator(unittest.IsolatedAsyncioTestCase):
     async def test_hold_frame_print(self):
         async def idle_callback(processor: UserIdleProcessor):
             await self._notifier.notify()
+
         user_idle = UserIdleProcessor(callback=idle_callback, timeout=1.0)
 
         aggregator = HoldLastFrameAggregator(
             notifier=self._notifier,
             hold_frame_classes=(TextFrame,),
         )
-        pipeline = Pipeline([
-            aggregator,
-            # user_idle,
-            FunctionFilter(filter=self.wake_notifier_filter),
-            PrintOutFrameProcessor(),
-        ])
+        pipeline = Pipeline(
+            [
+                aggregator,
+                # user_idle,
+                FunctionFilter(filter=self.wake_notifier_filter),
+                PrintOutFrameProcessor(),
+            ]
+        )
         task = PipelineTask(pipeline, PipelineParams())
 
         await task.queue_frame(TextFrame("Hello last one frame, "))
         await task.queue_frame(SyncNotifyFrame())
-        await task.queue_frame(ImageRawFrame(
-            image=bytes([]),
-            size=(0, 0),
-            format="JPEG",
-            mode="RGB",
-        ))
+        await task.queue_frame(
+            ImageRawFrame(
+                image=bytes([]),
+                size=(0, 0),
+                format="JPEG",
+                mode="RGB",
+            )
+        )
         await task.queue_frame(TextFrame("Goodbye1."))
-        await task.queue_frame(ImageRawFrame(
-            image=bytes([]),
-            size=(0, 0),
-            format="PNG",
-            mode="RGB",
-        ))
+        await task.queue_frame(
+            ImageRawFrame(
+                image=bytes([]),
+                size=(0, 0),
+                format="PNG",
+                mode="RGB",
+            )
+        )
         # await task.queue_frame(EndFrame())
         await task.queue_frame(TextFrame("end"))
         await task.queue_frame(TextFrame("endTask"))

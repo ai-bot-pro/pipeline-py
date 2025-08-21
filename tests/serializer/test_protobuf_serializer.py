@@ -33,7 +33,10 @@ class TestProtobufFrameSerializer(unittest.IsolatedAsyncioTestCase):
 
     async def test_image(self):
         image_frame = ImageRawFrame(
-            image=b"1234567890", size=(1280, 720), format="JPEG", mode="RGB",
+            image=b"1234567890",
+            size=(1280, 720),
+            format="JPEG",
+            mode="RGB",
         )
         frame = self.serializer.deserialize(self.serializer.serialize(image_frame))
         print(frame)

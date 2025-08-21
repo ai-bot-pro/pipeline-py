@@ -1,4 +1,3 @@
-
 import asyncio
 from apipeline.frames.control_frames import EndFrame
 from apipeline.frames.data_frames import TextFrame
@@ -11,8 +10,7 @@ from apipeline.processors.output_processor import OutputFrameProcessor
 
 async def main():
     aggregator = SentenceAggregator()
-    out_processor = OutputFrameProcessor(
-        cb=lambda x: print(f"sink_callback print frame: {x}"))
+    out_processor = OutputFrameProcessor(cb=lambda x: print(f"sink_callback print frame: {x}"))
     pipeline = Pipeline([aggregator, out_processor])
     task = PipelineTask(pipeline, PipelineParams(allow_interruptions=True))
 

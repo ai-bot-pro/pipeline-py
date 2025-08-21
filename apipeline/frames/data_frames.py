@@ -16,6 +16,7 @@ class TextFrame(DataFrame):
     be used to send text through pipelines.
 
     """
+
     text: str
 
     def __str__(self):
@@ -28,6 +29,7 @@ class AudioRawFrame(DataFrame):
     microphone has been enabled.
 
     """
+
     audio: bytes
     sample_rate: int = 16000
     num_channels: int = 1
@@ -48,6 +50,7 @@ class ImageRawFrame(DataFrame):
 
     e.g.: image info from PIL.Image
     """
+
     image: bytes
     size: Tuple[int, int]
     format: str | None

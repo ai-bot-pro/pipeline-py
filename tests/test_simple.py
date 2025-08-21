@@ -14,11 +14,9 @@ python -m unittest tests.test_simple.TestSimple
 
 
 class FrameTraceLogger(FrameProcessor):
-
     async def process_frame(
-            self,
-            frame: Frame,
-            direction: FrameDirection = FrameDirection.DOWNSTREAM):
+        self, frame: Frame, direction: FrameDirection = FrameDirection.DOWNSTREAM
+    ):
         await super().process_frame(frame, direction)
 
         from_to = f"{self._prev} ---> {self}"
@@ -29,15 +27,13 @@ class FrameTraceLogger(FrameProcessor):
 
 class TestSimple(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
-
-        pipeline = Pipeline([
-            FrameTraceLogger(),
-        ])
-
-        self.task = PipelineTask(
-            pipeline,
-            PipelineParams()
+        pipeline = Pipeline(
+            [
+                FrameTraceLogger(),
+            ]
         )
+
+        self.task = PipelineTask(pipeline, PipelineParams())
 
     async def asyncTearDown(self):
         pass
@@ -45,7 +41,9 @@ class TestSimple(unittest.IsolatedAsyncioTestCase):
     async def test_run(self):
         runner = PipelineRunner()
         await self.task.queue_frame(TextFrame("你好"))
-        await self.task.queue_frame(ImageRawFrame(image=bytes([]), size=(0, 0), format="PNG", mode="RGB"))
+        await self.task.queue_frame(
+            ImageRawFrame(image=bytes([]), size=(0, 0), format="PNG", mode="RGB")
+        )
         await self.task.queue_frame(AudioRawFrame(audio=bytes([])))
         await self.task.queue_frame(EndFrame())
         await runner.run(self.task)

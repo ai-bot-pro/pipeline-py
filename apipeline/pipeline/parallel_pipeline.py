@@ -17,7 +17,6 @@ from apipeline.frames.control_frames import EndFrame, StartFrame
 
 
 class Source(FrameProcessor):
-
     def __init__(self, upstream_queue: asyncio.Queue):
         super().__init__()
         self._up_queue = upstream_queue
@@ -33,7 +32,6 @@ class Source(FrameProcessor):
 
 
 class Sink(FrameProcessor):
-
     def __init__(self, downstream_queue: asyncio.Queue):
         super().__init__()
         self._down_queue = downstream_queue

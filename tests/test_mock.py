@@ -14,13 +14,10 @@ class TestMock(unittest.TestCase):
             return self.name
 
     def setUp(self):
-        self.processor1 = self.MockProcessor('processor1')
-        self.processor2 = self.MockProcessor('processor2')
-        self.pipeline = Pipeline([
-            self.processor1,
-            self.processor2
-        ])
-        self.pipeline.name = 'MyClass'
+        self.processor1 = self.MockProcessor("processor1")
+        self.processor2 = self.MockProcessor("processor2")
+        self.pipeline = Pipeline([self.processor1, self.processor2])
+        self.pipeline.name = "MyClass"
 
 
 class TestMyFunction(unittest.TestCase):
@@ -39,5 +36,5 @@ def my_function(service):
     return data["key"]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
