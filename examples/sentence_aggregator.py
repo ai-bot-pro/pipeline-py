@@ -1,7 +1,7 @@
 
 import asyncio
 from apipeline.frames.control_frames import EndFrame
-from apipeline.frames.data_frames import DataFrame, TextFrame
+from apipeline.frames.data_frames import TextFrame
 from apipeline.pipeline.pipeline import Pipeline
 from apipeline.pipeline.runner import PipelineRunner
 from apipeline.pipeline.task import PipelineParams, PipelineTask

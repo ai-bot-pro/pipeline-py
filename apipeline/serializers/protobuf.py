@@ -16,25 +16,27 @@ class ProtobufFrameSerializer(FrameSerializer):
 
     SERIALIZABLE_FIELDS = {v: k for k, v in SERIALIZABLE_TYPES.items()}
 
-    def __init__(self):
-        pass
-
     def serialize(self, frame: Frame) -> str | bytes | None:
         proto_frame = frame_protos.Frame()
-        if type(frame) not in self.SERIALIZABLE_TYPES:
+        if type(frame) not in ProtobufFrameSerializer.SERIALIZABLE_TYPES:
             logging.warning(f"Frame type {type(frame)} is not serializable")
             return None
 
         # ignoring linter errors; we check that type(frame) is in this dict above
-        proto_optional_name = self.SERIALIZABLE_TYPES[type(frame)]
+        proto_optional_name = ProtobufFrameSerializer.SERIALIZABLE_TYPES[type(frame)]
         for field in dataclasses.fields(frame):
             value = getattr(frame, field.name)
             if not value:
                 continue
 
-            if (type(frame) == ImageRawFrame and field.name == "size" \
-                and type(value)==tuple and len(value)==2):
-                setattr(getattr(proto_frame, proto_optional_name), field.name, f"{value[0]}x{value[1]}")
+            if (isinstance(frame, ImageRawFrame) and field.name == "size"
+                    and isinstance(value, tuple) and len(value) == 2):
+                setattr(
+                    getattr(
+                        proto_frame,
+                        proto_optional_name),
+                    field.name,
+                    f"{value[0]}x{value[1]}")
             else:
                 setattr(getattr(proto_frame, proto_optional_name), field.name, value)
 
@@ -59,7 +61,7 @@ class ProtobufFrameSerializer(FrameSerializer):
 
         proto = frame_protos.Frame.FromString(data)
         which = proto.WhichOneof("frame")
-        if which not in self.SERIALIZABLE_FIELDS:
+        if which not in ProtobufFrameSerializer.SERIALIZABLE_FIELDS:
             logging.error("Unable to deserialize a valid frame")
             return None
 
@@ -75,7 +77,7 @@ class ProtobufFrameSerializer(FrameSerializer):
             del args_dict["name"]
 
         # Create the instance
-        class_name = self.SERIALIZABLE_FIELDS[which]
+        class_name = ProtobufFrameSerializer.SERIALIZABLE_FIELDS[which]
         if class_name == ImageRawFrame:
             size = args_dict["size"].split("x") if "size" in args_dict else []
             args_dict["size"] = (int(size[0]), int(size[1]))
