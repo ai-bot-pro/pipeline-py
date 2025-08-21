@@ -108,11 +108,7 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         running = True
         while running:
             try:
-                if self.get_event_loop().is_closed():
-                    logging.warning(f"{self.name} event loop is closed")
-                    break
-
-                frame = await self._sink_queue.get()
+                frame = await asyncio.wait_for(self._sink_queue.get(), timeout=1)
                 # print(f"_sink_queue.get: {frame}")
                 # sink data frame
                 if isinstance(frame, DataFrame):
@@ -129,10 +125,16 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
                 running = not isinstance(frame, EndFrame)
 
                 self._sink_queue.task_done()
+            except asyncio.TimeoutError:
+                continue
             except asyncio.CancelledError:
+                logging.info(f"{self} _sink_task_handler cancelled")
                 break
             except Exception as ex:
                 logging.exception(f"{self} error processing sink queue: {ex}")
+                if self.get_event_loop().is_closed():
+                    logging.warning(f"{self.name} event loop is closed")
+                    break
 
     @abstractmethod
     async def sink(self, frame: DataFrame):

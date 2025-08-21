@@ -74,15 +74,16 @@ class AsyncFrameProcessor(FrameProcessor):
         running = True
         while running:
             try:
-                if self.get_event_loop().is_closed():
-                    logging.warning(f"{self.name} event loop is closed")
-                    break
-
-                (frame, direction) = await self._push_queue.get()
+                (frame, direction) = await asyncio.wait_for(self._push_queue.get(), timeout=1)
                 await self.push_frame(frame, direction)
                 running = not isinstance(frame, EndFrame)
+            except asyncio.TimeoutError:
+                pass
             except asyncio.CancelledError:
+                logging.info(f"{self.name} _push_frame_task_handle cancelled")
                 break
             except Exception as ex:
                 logging.exception(f"{self.name} Unexpected error in _push_frame_task_handler: {ex}")
-                continue
+                if self.get_event_loop().is_closed():
+                    logging.warning(f"{self.name} event loop is closed")
+                    break
