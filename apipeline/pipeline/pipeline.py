@@ -44,7 +44,8 @@ class PipelineSink(FrameProcessor):
 class Pipeline(BasePipeline):
     def __init__(self, processors: List[FrameProcessor]):
         super().__init__()
-
+        assert processors is not None
+        processors = [p for p in processors if p is not None]
         # Add a source and a sink queue so we can forward frames upstream and
         # downstream outside of the pipeline.
         self._source = PipelineSource(self.push_frame)
