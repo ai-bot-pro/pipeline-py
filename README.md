@@ -8,6 +8,8 @@
 
 > python --version >=3.10 with [asyncio-task](https://docs.python.org/3.11/library/asyncio-task.html)
 
+- [pipeline-go](https://github.com/weedge/pipeline-go)
+
 ## Installation
 - local To install apipeline(pipeline-python):
 ```
@@ -24,11 +26,15 @@ pip install apipeline
 
 ## Design
 see [docs/design.md](https://github.com/weedge/pipeline-py/tree/main/docs/design.md)
-<img width="1353" height="442" alt="image" src="https://github.com/user-attachments/assets/42dcc74e-e525-4915-a876-5dc49a46f3d4" />
-<img width="1441" height="453" alt="image" src="https://github.com/user-attachments/assets/76251c01-8b7c-4103-8b3f-6464d58b0d01" />
-<img width="1436" height="458" alt="image" src="https://github.com/user-attachments/assets/9f2f1339-0283-4711-a710-565fc74bdd99" />
 
+<img width="1403" height="465" alt="image" src="https://github.com/user-attachments/assets/d6646922-0a80-4ded-9614-00891efd41c8" />
 
+### pipeline
+<img width="1440" height="387" alt="image" src="https://github.com/user-attachments/assets/1a190b65-ebe0-4c76-bcd5-f2513f2da5bb" />
+<img width="1447" height="379" alt="image" src="https://github.com/user-attachments/assets/5a54cd3b-d543-495d-8b6d-e361f60cdd4d" />
+<img width="1455" height="639" alt="image" src="https://github.com/user-attachments/assets/23ebb695-941a-4ec6-baef-077c1d00cf5b" />
+<img width="1443" height="544" alt="image" src="https://github.com/user-attachments/assets/21a8c337-33f7-4378-88ec-0b50104e5808" />
+<img width="1447" height="542" alt="image" src="https://github.com/user-attachments/assets/2c00c8d4-e5e3-4daa-8d7a-08ecf37fcf8a" />
 
 
 ## Examples
@@ -37,4 +43,8 @@ see [examples](https://github.com/weedge/pipeline-py/tree/main/examples)
 
 ## Acknowledge
 1. borrowed a lot of code from [pipecat](https://github.com/pipecat-ai/pipecat.git)
+
+
+
+
 
