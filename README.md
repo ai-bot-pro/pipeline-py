@@ -8,6 +8,8 @@
 
 > python --version >=3.10 with [asyncio-task](https://docs.python.org/3.11/library/asyncio-task.html)
 
+- [pipeline-go](https://github.com/weedge/pipeline-go)
+
 ## Installation
 - local To install apipeline(pipeline-python):
 ```
@@ -41,6 +43,7 @@ see [examples](https://github.com/weedge/pipeline-py/tree/main/examples)
 
 ## Acknowledge
 1. borrowed a lot of code from [pipecat](https://github.com/pipecat-ai/pipecat.git)
+
 
 
 
