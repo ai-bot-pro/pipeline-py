@@ -15,9 +15,9 @@ class SequentialMergePipeline(Pipeline):
     async def run_pipeline(self):
         for idx, pipeline in enumerate(self.pipelines):
             while True:
-                frame = await pipeline.sink.get()
+                frame = await pipeline._sink.get()
                 if isinstance(frame, EndFrame):
                     break
-                await self.sink.put(frame)
+                await self._sink.put(frame)
 
-        await self.sink.put(EndFrame())
+        await self._sink.put(EndFrame())
