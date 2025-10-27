@@ -112,7 +112,7 @@ class ParallelPipeline(BasePipeline):
             await asyncio.gather(*[s.process_frame(frame, direction) for s in self._sinks])
         elif direction == FrameDirection.DOWNSTREAM:
             # If we get a downstream frame we process it in each source.
-            # TODO(aleix): We are creating task for each frame. For real-time
+            # TODO: We are creating task for each frame. For real-time
             # video/audio this might be too slow. We should use an already
             # created task instead.
             await asyncio.gather(*[s.process_frame(frame, direction) for s in self._sources])
