@@ -27,16 +27,18 @@ pip install apipeline
 ## Design
 see [docs/design.md](https://github.com/weedge/pipeline-py/tree/main/docs/design.md)
 
-<img width="1403" height="465" alt="image" src="https://github.com/user-attachments/assets/d6646922-0a80-4ded-9614-00891efd41c8" />
+<img width="1353" height="462" alt="image" src="https://github.com/user-attachments/assets/ef33e90b-ea8c-4add-8f00-4a88deb29c35" />
 
 ### pipeline
-<img width="1440" height="387" alt="image" src="https://github.com/user-attachments/assets/1a190b65-ebe0-4c76-bcd5-f2513f2da5bb" />
-<img width="1447" height="379" alt="image" src="https://github.com/user-attachments/assets/5a54cd3b-d543-495d-8b6d-e361f60cdd4d" />
-<img width="1455" height="639" alt="image" src="https://github.com/user-attachments/assets/23ebb695-941a-4ec6-baef-077c1d00cf5b" />
-<img width="1443" height="544" alt="image" src="https://github.com/user-attachments/assets/21a8c337-33f7-4378-88ec-0b50104e5808" />
+<img width="1120" height="306" alt="image" src="https://github.com/user-attachments/assets/3fa65a61-ac65-42f4-a967-953822344b0a" />
+<img width="1135" height="303" alt="image" src="https://github.com/user-attachments/assets/51185563-7372-4899-837c-60b2d1d14283" />
+<img width="1134" height="497" alt="image" src="https://github.com/user-attachments/assets/10a1b1cf-27ac-4661-834f-1879f6ea4aad" />
+<img width="1387" height="523" alt="image" src="https://github.com/user-attachments/assets/2f3915a4-4860-4cee-ad6e-312744a424d2" />
+
+
 
 ### pipeline task runner
-<img width="1439" height="546" alt="image" src="https://github.com/user-attachments/assets/0da53ba9-20e4-4a9c-a98c-9d2e1db3a1ac" />
+<img width="1241" height="471" alt="image" src="https://github.com/user-attachments/assets/d1364317-84e9-4440-8053-0da062fc016c" />
 
 
 ## Examples
@@ -45,6 +47,7 @@ see [examples](https://github.com/weedge/pipeline-py/tree/main/examples)
 
 ## Acknowledge
 1. borrowed a lot of code from [pipecat](https://github.com/pipecat-ai/pipecat.git)
+
 
 
 
