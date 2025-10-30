@@ -66,16 +66,32 @@ Pipeline 分为 串行，并行，并行同步
 
 整体定义总括如图红字所示
 
-
 ### pipeline
+
+- 串行同步处理：由同步 processor组成，upstream/downstream frame按链式顺序执行，每个pipeline有头和尾，分别是Source和Sinker, 用于和其他pipeline 的输入/输出 进行组装；
+
 <img width="1120" height="306" alt="image" src="https://github.com/user-attachments/assets/3fa65a61-ac65-42f4-a967-953822344b0a" />
+
+- 串行异步处理(包含异步processor)：由异步/同步 processor组成，异步processor在同步processor的基础上加入了upstream/downstream 异步队列buffer，以及对应异步处理upstream/downstream frame handler 按链式顺序执行；(如果不不需要等待下一步processor的结果，可以使用异步方式处理，直接将frame通过queue_frame的方式写入队列buffer中, 由异步processor中的handler来异步处理调用process_frame)
+
 <img width="1135" height="303" alt="image" src="https://github.com/user-attachments/assets/51185563-7372-4899-837c-60b2d1d14283" />
+
+- 并行异步处理：由多个串行的pipeline并行执行，彼此之间不需要同步；
+
+  (注意：这里的并行指的流程上的并行，真正任务在运行时是并发工作)
+
 <img width="1134" height="497" alt="image" src="https://github.com/user-attachments/assets/10a1b1cf-27ac-4661-834f-1879f6ea4aad" />
+
+- 并行同步处理：由多个串行的pipeline并行执行，处理的upstream/downstream frame在出口处需要同步；同步实现使用up/down queue来缓存对应frame, 直到处理SyncFrame时，将queue中缓存的frame写入upstream/downstream；图中展示了整体流程
+
 <img width="1387" height="523" alt="image" src="https://github.com/user-attachments/assets/2f3915a4-4860-4cee-ad6e-312744a424d2" />
 
 
 
 ### pipeline task runner
+
+由多个pipeline (比如有以上三种类型的pipeline：串行pipeline, 并行pipeline, 并行同步pipeline)组装成一个DAG processor； pipeline Task 中定义了一个Source processor 来对接组装好的DAG processor,  在程序启动运行时，通过runner发送控制/系统(StartFrame / MetricsFrame)指令；比如在实时聊天场景中，用户发起会话连接， 启动运行 pipeline Task时，会根据PipelineParams初始参数初始化StartFrame进行启动(也会根据是否监控来发送MetricsFrame进行监控信息收集)，DAG中的processor收到StartFrame之后，开始执行对应的启动流程(如果有对MetricsFrame进行处理，将processor中的监控信息写入MetricsFrame中进行收集)；如果会话结束，发起EndFrame; 如果结束这个任务(或者遇到系统错误需要结束时)，发起StopTaskFrame; 如果触发系统进程退出信号，发送CancelFrame, 进行清场，退出。
+
 <img width="1241" height="471" alt="image" src="https://github.com/user-attachments/assets/d1364317-84e9-4440-8053-0da062fc016c" />
 
 
