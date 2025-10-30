@@ -53,7 +53,7 @@ see [docs/design.md](https://github.com/weedge/pipeline-py/tree/main/docs/design
 应用frame 主要是正对业务场景来定义，这里提供一个基类
 
 
-序列化主要是 PB(需要定义IDL schema) 和 JSON 
+序列化主要是 PB(需要定义IDL schema 数据规范) 和 JSON 
 
 Processor 分为 
 - 同步 异步 processor 主要处理系统和控制层面的frame
@@ -85,6 +85,7 @@ see [examples](https://github.com/weedge/pipeline-py/tree/main/examples)
 
 ## Acknowledge
 1. borrowed a lot of code from [pipecat](https://github.com/pipecat-ai/pipecat.git)
+
 
 
 
