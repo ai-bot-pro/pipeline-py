@@ -50,7 +50,7 @@ see [docs/design.md](https://github.com/weedge/pipeline-py/tree/main/docs/design
 - AudioRawFrame: 原始音频信息帧
 - ImageRawFrame: 原始图片信息帧
 
-应用frame 主要是正对业务场景来定义，这里提供一个基类
+应用frame 主要是针对业务场景来定义，这里提供一个基类(结构)
 
 
 序列化主要是 PB(需要定义IDL schema 数据规范) 和 JSON 
@@ -110,6 +110,7 @@ see [examples](https://github.com/weedge/pipeline-py/tree/main/examples)
 - The code is released under the BSD 3-Clause License.
 - The documents are licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a>
+
 
 
 
