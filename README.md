@@ -35,7 +35,7 @@ see [docs/design.md](https://github.com/weedge/pipeline-py/tree/main/docs/design
 - StopTaskFrame: 停止任务指令
 - StartInterruptionFrame: 中断指令，对于异步processor进行中断，直接切断异步buffer重启queue_frame; 如果有些模型内化了终端指令，发送给底层模型触发模型中断操作，或者停止流式输出
 - StopInterruptionFrame: 停止中断指令
-- MetricsFrame: 系统监控指标 (processor 运行时长)
+- MetricsFrame: 系统监控指标 (processor 运行时长; first token/chunk/byte time)
 
 
 控制指令frame
@@ -85,6 +85,7 @@ see [examples](https://github.com/weedge/pipeline-py/tree/main/examples)
 
 ## Acknowledge
 1. borrowed a lot of code from [pipecat](https://github.com/pipecat-ai/pipecat.git)
+
 
 
 
