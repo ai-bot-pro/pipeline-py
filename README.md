@@ -29,6 +29,43 @@ see [docs/design.md](https://github.com/weedge/pipeline-py/tree/main/docs/design
 
 <img width="1426" height="472" alt="image" src="https://github.com/user-attachments/assets/7eaafdd2-0778-4fb7-8d21-14c4f188eb87" />
 
+系统指令frame
+- CancelFrame: 系统退出指令，用于系统接受退出信号，清理退出系统
+- ErrorFrame: 系统运行时错误指令
+- StopTaskFrame: 停止任务指令
+- StartInterruptionFrame: 中断指令，对于异步processor进行中断，直接切断异步buffer重启queue_frame; 如果有些模型内化了终端指令，发送给底层模型触发模型中断操作，或者停止流式输出
+- StopInterruptionFrame: 停止中断指令
+- MetricsFrame: 系统监控指标 (processor 运行时长)
+
+
+控制指令frame
+- StartFrame: 系统开始运行指令，会携带初始参数：是否中断，是否监控等参数
+- EndFrame: 结束运行指令，
+- SyncFrame: 并行同步pipeline需要用到，输出口等到SyncFrame才把buffer的结果输出
+- SyncNotifyFrame: 用于事件通知，广播
+
+
+数据frame （主要是多模态数据 用于chatbot）
+- TextFrame: 文本
+- AudioRawFrame: 原始音频信息帧
+- ImageRawFrame: 原始图片信息帧
+
+应用frame 主要是正对业务场景来定义，这里提供一个基类
+
+
+序列化主要是 PB(需要定义IDL schema) 和 JSON 
+
+Processor 分为 
+- 同步 异步 processor 主要处理系统和控制层面的frame
+- 针对多模态数据聚合类的processor
+- 过滤processor 根据定义的过滤handler进行过滤处理
+- 日志processor 更具过滤条件打印日志，便于frame 追踪调试
+- 输入输出processor 对输入输出的frame进行分类处理，对应子类，或者组合类直接实现对应类型frame的处理
+
+Pipeline 分为 串行，并行，并行同步 
+
+整体定义总括如图红字所示
+
 
 ### pipeline
 <img width="1120" height="306" alt="image" src="https://github.com/user-attachments/assets/3fa65a61-ac65-42f4-a967-953822344b0a" />
@@ -48,6 +85,7 @@ see [examples](https://github.com/weedge/pipeline-py/tree/main/examples)
 
 ## Acknowledge
 1. borrowed a lot of code from [pipecat](https://github.com/pipecat-ai/pipecat.git)
+
 
 
 
