@@ -70,21 +70,21 @@ Pipeline 分为 串行，并行，并行同步
 
 - 串行同步处理：由同步 processor组成，upstream/downstream frame按链式顺序执行，每个pipeline有头和尾，分别是Source和Sinker, 用于和其他pipeline 的输入/输出 进行组装；
 
-<img width="1120" height="306" alt="image" src="https://github.com/user-attachments/assets/3fa65a61-ac65-42f4-a967-953822344b0a" />
+<img width="1166" height="313" alt="image" src="https://github.com/user-attachments/assets/d7640a07-338d-4e5e-a12d-ba8d6c5ea3bc" />
 
 - 串行异步处理(包含异步processor)：由异步/同步 processor组成，异步processor在同步processor的基础上加入了upstream/downstream 异步队列buffer，以及对应异步处理upstream/downstream frame handler 按链式顺序执行；(如果不不需要等待下一步processor的结果，可以使用异步方式处理，直接将frame通过queue_frame的方式写入队列buffer中, 由异步processor中的handler来异步处理调用process_frame)
 
-<img width="1135" height="303" alt="image" src="https://github.com/user-attachments/assets/51185563-7372-4899-837c-60b2d1d14283" />
+<img width="1156" height="302" alt="image" src="https://github.com/user-attachments/assets/2356f97c-d968-43be-84d0-0b1358e745c9" />
 
 - 并行异步处理：由多个串行的pipeline并行执行，彼此之间不需要同步；
 
   (注意：这里的并行指的流程上的并行，真正任务在运行时是并发工作)
 
-<img width="1134" height="497" alt="image" src="https://github.com/user-attachments/assets/10a1b1cf-27ac-4661-834f-1879f6ea4aad" />
+<img width="1169" height="512" alt="image" src="https://github.com/user-attachments/assets/bd0bba96-4302-4335-8408-980dd0964e65" />
 
 - 并行同步处理：由多个串行的pipeline并行执行，处理的upstream/downstream frame在出口处需要同步；同步实现使用up/down queue来缓存对应frame, 直到处理SyncFrame时，将queue中缓存的frame写入upstream/downstream；图中展示了整体流程
 
-<img width="1387" height="523" alt="image" src="https://github.com/user-attachments/assets/2f3915a4-4860-4cee-ad6e-312744a424d2" />
+<img width="1445" height="544" alt="image" src="https://github.com/user-attachments/assets/ef0c9f67-b362-4e73-865b-3d6ef03b03a9" />
 
 
 
@@ -106,8 +106,10 @@ see [examples](https://github.com/weedge/pipeline-py/tree/main/examples)
 
 
 
-
-
+## License
+- The code is released under the BSD 3-Clause License.
+- The documents are licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a>
 
 
 
