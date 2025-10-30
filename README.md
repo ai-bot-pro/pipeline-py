@@ -27,7 +27,7 @@ pip install apipeline
 ## Design
 see [docs/design.md](https://github.com/weedge/pipeline-py/tree/main/docs/design.md)
 
-<img width="1425" height="476" alt="image" src="https://github.com/user-attachments/assets/0a4345c6-b440-4bf4-91c8-19e27e4bbc42" />
+<img width="1426" height="472" alt="image" src="https://github.com/user-attachments/assets/7eaafdd2-0778-4fb7-8d21-14c4f188eb87" />
 
 
 ### pipeline
@@ -48,6 +48,7 @@ see [examples](https://github.com/weedge/pipeline-py/tree/main/examples)
 
 ## Acknowledge
 1. borrowed a lot of code from [pipecat](https://github.com/pipecat-ai/pipecat.git)
+
 
 
 
