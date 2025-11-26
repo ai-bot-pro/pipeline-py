@@ -8,7 +8,7 @@ from apipeline.frames.sys_frames import (
     CancelFrame,
     MetricsFrame,
     StartInterruptionFrame,
-    StopInterruptionFrame,
+    InterruptionFrame,
     SystemFrame,
 )
 from apipeline.frames.control_frames import ControlFrame, EndFrame, StartFrame
@@ -87,7 +87,7 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
 
         await super()._handle_interruptions(frame)
 
-        if isinstance(frame, StartInterruptionFrame):
+        if isinstance(frame, (StartInterruptionFrame, InterruptionFrame)):
             # Stop sink task.
             self._sink_task.cancel()
             await self._sink_task

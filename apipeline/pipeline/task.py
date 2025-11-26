@@ -10,7 +10,15 @@ from typing import AsyncIterable, Iterable
 
 from pydantic import BaseModel
 
-from apipeline.frames.sys_frames import CancelFrame, ErrorFrame, Frame, MetricsFrame, StopTaskFrame, InterruptionTaskFrame, InterruptionFrame
+from apipeline.frames.sys_frames import (
+    CancelFrame,
+    ErrorFrame,
+    Frame,
+    MetricsFrame,
+    StopTaskFrame,
+    InterruptionTaskFrame,
+    InterruptionFrame,
+)
 from apipeline.frames.control_frames import EndFrame, StartFrame
 from apipeline.pipeline.base_pipeline import BasePipeline
 from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
@@ -34,7 +42,7 @@ class Source(FrameProcessor):
         await super().process_frame(frame, direction)
 
         if isinstance(frame, InterruptionTaskFrame):
-            logging.debug(f"{self}: received interruption task frame {frame}")
+            logging.info(f"{self}: received interruption task frame {frame}")
             await self.push_frame(InterruptionFrame(), FrameDirection.DOWNSTREAM)
             return
 

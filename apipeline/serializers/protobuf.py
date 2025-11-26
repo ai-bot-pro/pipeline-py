@@ -3,7 +3,11 @@ import dataclasses
 
 import apipeline.frames.protobufs.data_frames_pb2 as frame_protos
 from apipeline.frames.data_frames import AudioRawFrame, Frame, TextFrame, ImageRawFrame
-from apipeline.frames.sys_frames import InterruptionFrame, StartInterruptionFrame, StopInterruptionFrame
+from apipeline.frames.sys_frames import (
+    InterruptionFrame,
+    StartInterruptionFrame,
+    StopInterruptionFrame,
+)
 from .base_serializer import FrameSerializer
 
 

@@ -1,7 +1,11 @@
 import unittest
 
 from apipeline.frames.data_frames import AudioRawFrame, TextFrame, ImageRawFrame
-from apipeline.frames.sys_frames import InterruptionFrame, StartInterruptionFrame, StopInterruptionFrame
+from apipeline.frames.sys_frames import (
+    InterruptionFrame,
+    StartInterruptionFrame,
+    StopInterruptionFrame,
+)
 from apipeline.serializers.protobuf import ProtobufFrameSerializer
 
 

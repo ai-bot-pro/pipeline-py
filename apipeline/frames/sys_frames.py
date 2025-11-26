@@ -49,6 +49,7 @@ class InterruptionTaskFrame(SystemFrame):
     """Indicates that a pipeline task should be interruption.
     pipeline send InterruptionFrame
     """
+
     pass
 
 

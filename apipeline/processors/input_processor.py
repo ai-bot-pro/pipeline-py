@@ -3,7 +3,7 @@ from abc import abstractmethod
 import asyncio
 
 from apipeline.frames.base import Frame
-from apipeline.frames.sys_frames import CancelFrame, SystemFrame
+from apipeline.frames.sys_frames import CancelFrame, SystemFrame, StartInterruptionFrame, InterruptionFrame
 from apipeline.frames.control_frames import EndFrame, StartFrame, ControlFrame
 from apipeline.frames.data_frames import DataFrame
 from apipeline.processors.async_frame_processor import AsyncFrameProcessor
@@ -49,6 +49,8 @@ class InputProcessor(AsyncFrameProcessor):
             # We don't queue a CancelFrame since we want to stop ASAP.
             await self.push_frame(frame, direction)
             await self.stop()
+        elif isinstance(frame, (StartInterruptionFrame, InterruptionFrame)):
+            pass
         # all other system frames
         elif isinstance(frame, SystemFrame):
             await self.process_sys_frame(frame, direction)

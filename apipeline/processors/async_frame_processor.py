@@ -7,7 +7,7 @@
 import logging
 import asyncio
 
-from apipeline.frames.sys_frames import Frame, StartInterruptionFrame
+from apipeline.frames.sys_frames import Frame, StartInterruptionFrame, InterruptionFrame
 from apipeline.frames.control_frames import EndFrame
 from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 
@@ -36,7 +36,7 @@ class AsyncFrameProcessor(FrameProcessor):
     async def process_frame(self, frame: Frame, direction: FrameDirection):
         await super().process_frame(frame, direction)
 
-        if isinstance(frame, StartInterruptionFrame):
+        if isinstance(frame, (StartInterruptionFrame, InterruptionFrame)):
             await self._handle_interruptions(frame)
 
     async def cleanup(self):
@@ -57,6 +57,9 @@ class AsyncFrameProcessor(FrameProcessor):
     # Handle interruptions
     #
     async def _handle_interruptions(self, frame: Frame):
+        """
+        NOTE: push interruptions frame, don't push again
+        """
         await self.cleanup()
         # Push an out-of-band frame (i.e. not using the ordered push
         # frame task).
