@@ -100,6 +100,5 @@ class MetricsFrame(SystemFrame):
     characters: List[Mapping[str, Any]] | None = None
 
     def __str__(self):
-        p_str = f"{self.name} ttfb:{self.ttfb} | processing:{self.processing}"
-        f" | tokens:{self.tokens} | characters:{self.characters}"
+        p_str = f"{self.name} ttfb:{self.ttfb} | processing:{self.processing} | tokens:{self.tokens} | characters:{self.characters}"
         return p_str
