@@ -3,7 +3,12 @@ from abc import abstractmethod
 import asyncio
 
 from apipeline.frames.base import Frame
-from apipeline.frames.sys_frames import CancelFrame, SystemFrame, StartInterruptionFrame, InterruptionFrame
+from apipeline.frames.sys_frames import (
+    CancelFrame,
+    SystemFrame,
+    StartInterruptionFrame,
+    InterruptionFrame,
+)
 from apipeline.frames.control_frames import EndFrame, StartFrame, ControlFrame
 from apipeline.frames.data_frames import DataFrame
 from apipeline.processors.async_frame_processor import AsyncFrameProcessor
