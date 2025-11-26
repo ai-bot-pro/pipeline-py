@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11\x64\x61ta_frames.proto\x12\x0fpipeline_frames\"3\n\tTextFrame\x12\n\n\x02id\x18\x01 \x01(\x04\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04text\x18\x03 \x01(\t\"y\n\rAudioRawFrame\x12\n\n\x02id\x18\x01 \x01(\x04\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\r\n\x05\x61udio\x18\x03 \x01(\x0c\x12\x13\n\x0bsample_rate\x18\x04 \x01(\r\x12\x14\n\x0cnum_channels\x18\x05 \x01(\r\x12\x14\n\x0csample_width\x18\x06 \x01(\r\"d\n\rImageRawFrame\x12\n\n\x02id\x18\x01 \x01(\x04\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\r\n\x05image\x18\x03 \x01(\x0c\x12\x0c\n\x04size\x18\x04 \x01(\t\x12\x0e\n\x06\x66ormat\x18\x05 \x01(\t\x12\x0c\n\x04mode\x18\x06 \x01(\t\"\x9e\x01\n\x05\x46rame\x12*\n\x04text\x18\x01 \x01(\x0b\x32\x1a.pipeline_frames.TextFrameH\x00\x12/\n\x05\x61udio\x18\x02 \x01(\x0b\x32\x1e.pipeline_frames.AudioRawFrameH\x00\x12/\n\x05image\x18\x03 \x01(\x0b\x32\x1e.pipeline_frames.ImageRawFrameH\x00\x42\x07\n\x05\x66rameb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11\x64\x61ta_frames.proto\x12\x0fpipeline_frames\"3\n\tTextFrame\x12\n\n\x02id\x18\x01 \x01(\x04\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04text\x18\x03 \x01(\t\"y\n\rAudioRawFrame\x12\n\n\x02id\x18\x01 \x01(\x04\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\r\n\x05\x61udio\x18\x03 \x01(\x0c\x12\x13\n\x0bsample_rate\x18\x04 \x01(\r\x12\x14\n\x0cnum_channels\x18\x05 \x01(\r\x12\x14\n\x0csample_width\x18\x06 \x01(\r\"d\n\rImageRawFrame\x12\n\n\x02id\x18\x01 \x01(\x04\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\r\n\x05image\x18\x03 \x01(\x0c\x12\x0c\n\x04size\x18\x04 \x01(\t\x12\x0e\n\x06\x66ormat\x18\x05 \x01(\t\x12\x0c\n\x04mode\x18\x06 \x01(\t\"-\n\x11InterruptionFrame\x12\n\n\x02id\x18\x01 \x01(\x04\x12\x0c\n\x04name\x18\x02 \x01(\t\"2\n\x16StartInterruptionFrame\x12\n\n\x02id\x18\x01 \x01(\x04\x12\x0c\n\x04name\x18\x02 \x01(\t\"1\n\x15StopInterruptionFrame\x12\n\n\x02id\x18\x01 \x01(\x04\x12\x0c\n\x04name\x18\x02 \x01(\t\"\xe6\x02\n\x05\x46rame\x12*\n\x04text\x18\x01 \x01(\x0b\x32\x1a.pipeline_frames.TextFrameH\x00\x12/\n\x05\x61udio\x18\x02 \x01(\x0b\x32\x1e.pipeline_frames.AudioRawFrameH\x00\x12/\n\x05image\x18\x03 \x01(\x0b\x32\x1e.pipeline_frames.ImageRawFrameH\x00\x12:\n\x0cinterruption\x18\x64 \x01(\x0b\x32\".pipeline_frames.InterruptionFrameH\x00\x12\x45\n\x12start_interruption\x18\x65 \x01(\x0b\x32\'.pipeline_frames.StartInterruptionFrameH\x00\x12\x43\n\x11stop_interruption\x18\x66 \x01(\x0b\x32&.pipeline_frames.StopInterruptionFrameH\x00\x42\x07\n\x05\x66rameb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -27,6 +27,12 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_AUDIORAWFRAME']._serialized_end=212
   _globals['_IMAGERAWFRAME']._serialized_start=214
   _globals['_IMAGERAWFRAME']._serialized_end=314
-  _globals['_FRAME']._serialized_start=317
-  _globals['_FRAME']._serialized_end=475
+  _globals['_INTERRUPTIONFRAME']._serialized_start=316
+  _globals['_INTERRUPTIONFRAME']._serialized_end=361
+  _globals['_STARTINTERRUPTIONFRAME']._serialized_start=363
+  _globals['_STARTINTERRUPTIONFRAME']._serialized_end=413
+  _globals['_STOPINTERRUPTIONFRAME']._serialized_start=415
+  _globals['_STOPINTERRUPTIONFRAME']._serialized_end=464
+  _globals['_FRAME']._serialized_start=467
+  _globals['_FRAME']._serialized_end=825
 # @@protoc_insertion_point(module_scope)

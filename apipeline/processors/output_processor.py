@@ -63,9 +63,6 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         if isinstance(frame, CancelFrame):
             await self.push_frame(frame, direction)
             await self.cancel(frame)
-        elif isinstance(frame, StartInterruptionFrame) or isinstance(frame, StopInterruptionFrame):
-            await self.push_frame(frame, direction)
-            await self._handle_interruptions(frame)
         elif isinstance(frame, MetricsFrame):
             await self.push_frame(frame, direction)
             await self.send_metrics(frame)
@@ -88,15 +85,13 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         if not self.interruptions_allowed:
             return
 
+        await super()._handle_interruptions(frame)
+
         if isinstance(frame, StartInterruptionFrame):
             # Stop sink task.
             self._sink_task.cancel()
             await self._sink_task
             self._create_sink_task()
-            # Stop push task.
-            self._push_frame_task.cancel()
-            await self._push_frame_task
-            self._create_push_task()
 
     #
     # sink frames task

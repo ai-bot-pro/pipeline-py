@@ -1,65 +1,44 @@
 import logging
 
-from asyncio import AbstractEventLoop
-import asyncio
 import unittest
 from apipeline.frames.control_frames import EndFrame
 from apipeline.pipeline.pipeline import Pipeline, FrameDirection
 from apipeline.pipeline.sync_parallel_pipeline import SyncParallelPipeline
 from apipeline.pipeline.task import PipelineTask, PipelineParams
 from apipeline.pipeline.runner import PipelineRunner
-from apipeline.frames.data_frames import Frame, TextFrame
-from apipeline.processors.frame_processor import FrameProcessor
+from apipeline.frames.data_frames import TextFrame
+from apipeline.processors.logger import FrameLogger
 
 
 """
-python -m unittest tests.pipeline.test_sync_parallel_pipeline.TestParallelPipeline
+python -m unittest tests.pipeline.test_sync_parallel_pipeline
 """
-
-
-class FrameTraceLogger(FrameProcessor):
-    def __init__(
-        self, tag: str, *, name: str | None = None, loop: AbstractEventLoop | None = None, **kwargs
-    ):
-        super().__init__(name=name, loop=loop, **kwargs)
-        self._tag = tag
-
-    async def process_frame(
-        self, frame: Frame, direction: FrameDirection = FrameDirection.DOWNSTREAM
-    ):
-        await super().process_frame(frame, direction)
-
-        from_to = f"{self._prev} ---> {self}"
-        if direction == FrameDirection.UPSTREAM:
-            from_to = f"{self} <--- {self._next} "
-        if self._tag == "1.0":
-            await asyncio.sleep(1)
-        logging.info(f"Tag: {self._tag}; {from_to} get Frame: {frame}")
-        await self.push_frame(frame, direction)
 
 
 class TestParallelPipeline(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-
-        pipeline = Pipeline(
-            [
-                FrameTraceLogger(tag="0"),
-                SyncParallelPipeline(
-                    [FrameTraceLogger(tag="1.0"), FrameTraceLogger(tag="1.1")],
-                    [FrameTraceLogger(tag="2.0"), FrameTraceLogger(tag="2.1")],
-                ),
-                FrameTraceLogger(tag="3"),
-            ]
-        )
-
-        self.task = PipelineTask(pipeline, PipelineParams())
-
-    async def asyncTearDown(self):
         pass
 
-    async def test_run(self):
+    async def test_sync_parallel_pipeline(self):
+        pipeline = Pipeline(
+            [
+                FrameLogger(prefix="0"),
+                SyncParallelPipeline(
+                    [
+                        FrameLogger(prefix="1.0", sleep_time_s=1),
+                        FrameLogger(prefix="1.1"),
+                    ],
+                    [
+                        FrameLogger(prefix="2.0"),
+                        FrameLogger(prefix="2.1"),
+                    ],
+                ),
+                FrameLogger(prefix="3"),
+            ]
+        )
+        task = PipelineTask(pipeline, PipelineParams())
         runner = PipelineRunner()
-        await self.task.queue_frame(TextFrame("你好"))
-        await self.task.queue_frame(EndFrame())
-        await runner.run(self.task)
+        await task.queue_frame(TextFrame("你好"))
+        await task.queue_frame(EndFrame())
+        await runner.run(task)

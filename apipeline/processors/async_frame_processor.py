@@ -14,9 +14,12 @@ from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 
 class AsyncFrameProcessor(FrameProcessor):
     def __init__(
-        self, *, name: str | None = None, loop: asyncio.AbstractEventLoop | None = None,
+        self,
+        *,
+        name: str | None = None,
+        loop: asyncio.AbstractEventLoop | None = None,
         use_upstream_task: bool = True,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(name=name, loop=loop, **kwargs)
 
@@ -37,14 +40,17 @@ class AsyncFrameProcessor(FrameProcessor):
             await self._handle_interruptions(frame)
 
     async def cleanup(self):
-        if self._push_frame_task:
-            self._push_frame_task.cancel()
-            await self._push_frame_task
-            self._push_frame_task = None
-        if self._push_up_frame_task:
-            self._push_up_frame_task.cancel()
-            await self._push_up_frame_task
-            self._push_up_frame_task = None
+        try:
+            if self._push_frame_task:
+                self._push_frame_task.cancel()
+                await self._push_frame_task
+                self._push_frame_task = None
+            if self._push_up_frame_task:
+                self._push_up_frame_task.cancel()
+                await self._push_up_frame_task
+                self._push_up_frame_task = None
+        except Exception as ex:
+            logging.exception(f"{self.name} Unexpected error in cleanup: {ex}")
         logging.info(f"{self.name} AsyncFrameProcessor cleanup done")
 
     #
@@ -75,7 +81,9 @@ class AsyncFrameProcessor(FrameProcessor):
 
     def _create_upstream_push_task(self):
         self._push_up_queue = asyncio.Queue()
-        self._push_up_frame_task = self.get_event_loop().create_task(self._push_up_frame_task_handler())
+        self._push_up_frame_task = self.get_event_loop().create_task(
+            self._push_up_frame_task_handler()
+        )
         logging.info(f"{self.name} create push_up_frame_task")
 
     async def queue_frame(
@@ -118,7 +126,8 @@ class AsyncFrameProcessor(FrameProcessor):
                 break
             except Exception as ex:
                 logging.exception(
-                    f"{self.name} Unexpected error in _push_up_frame_task_handler: {ex}")
+                    f"{self.name} Unexpected error in _push_up_frame_task_handler: {ex}"
+                )
                 if self.get_event_loop().is_closed():
                     logging.warning(f"{self.name} event loop is closed")
                     break

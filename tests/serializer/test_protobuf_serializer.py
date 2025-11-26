@@ -1,10 +1,12 @@
 import unittest
 
 from apipeline.frames.data_frames import AudioRawFrame, TextFrame, ImageRawFrame
+from apipeline.frames.sys_frames import InterruptionFrame, StartInterruptionFrame, StopInterruptionFrame
 from apipeline.serializers.protobuf import ProtobufFrameSerializer
 
 
 """
+python -m unittest tests.serializer.test_protobuf_serializer.TestProtobufFrameSerializer.test_system_frame
 python -m unittest tests.serializer.test_protobuf_serializer.TestProtobufFrameSerializer.test_text
 python -m unittest tests.serializer.test_protobuf_serializer.TestProtobufFrameSerializer.test_audio
 python -m unittest tests.serializer.test_protobuf_serializer.TestProtobufFrameSerializer.test_image
@@ -18,6 +20,12 @@ class TestProtobufFrameSerializer(unittest.IsolatedAsyncioTestCase):
     @unittest.skip("FIXED")
     async def test_skip(self):
         pass
+
+    async def test_system_frame(self):
+        sys_frame = InterruptionFrame()
+        frame = self.serializer.deserialize(self.serializer.serialize(sys_frame))
+        print(frame)
+        self.assertEqual(frame, sys_frame)
 
     async def test_text(self):
         text_frame = TextFrame(text="hello world")
