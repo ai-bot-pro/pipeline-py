@@ -4,7 +4,6 @@
 
 # apipeline
 [![PyPI](https://img.shields.io/pypi/v/apipeline)](https://pypi.org/project/apipeline/)
-<a href="https://app.commanddash.io/agent/github_ai-bot-pro_pipeline-py"><img src="https://img.shields.io/badge/AI-Code%20Agent-EB9FDA"></a>
 
 > python --version >=3.10 with [asyncio-task](https://docs.python.org/3.11/library/asyncio-task.html)
 
@@ -110,6 +109,7 @@ see [examples](https://github.com/weedge/pipeline-py/tree/main/examples)
 - The code is released under the BSD 3-Clause License.
 - The documents are licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a>
+
 
 
 
