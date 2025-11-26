@@ -1,4 +1,5 @@
 from typing import Optional
+import asyncio
 import logging
 
 from apipeline.frames.base import Frame
@@ -12,6 +13,7 @@ class FrameLogger(FrameProcessor):
         color: Optional[str] = None,
         ignored_frame_types: Optional[list] = [],
         include_frame_types: Optional[list] = None,
+        sleep_time_s: int = 0,
     ):
         super().__init__()
         self._prefix = prefix
@@ -20,6 +22,7 @@ class FrameLogger(FrameProcessor):
             tuple(ignored_frame_types) if ignored_frame_types is not None else None
         )
         self._include_frame_types = tuple(include_frame_types) if include_frame_types else None
+        self._sleep_time = sleep_time_s
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
         if self._ignored_frame_types is not None and not isinstance(
@@ -36,4 +39,6 @@ class FrameLogger(FrameProcessor):
                     msg = f"<{self._color}>{msg}</>"
                 logging.info(msg)
 
+        if self._sleep_time > 0:
+            await asyncio.sleep(self._sleep_time)
         await self.push_frame(frame, direction)

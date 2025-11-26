@@ -45,6 +45,28 @@ class StopTaskFrame(SystemFrame):
 
 
 @dataclass
+class InterruptionTaskFrame(SystemFrame):
+    """Indicates that a pipeline task should be interruption.
+    pipeline send InterruptionFrame
+    """
+
+    pass
+
+
+@dataclass
+class InterruptionFrame(SystemFrame):
+    """Frame indicating user started speaking (interruption detected).
+
+    Emitted by the BaseInputTransport to indicate that a user has started
+    speaking (i.e. is interrupting). This is similar to
+    StartInterruptionFrame except that it should be pushed concurrently
+    with other frames (so the order is not guaranteed).
+    """
+
+    pass
+
+
+@dataclass
 class StartInterruptionFrame(SystemFrame):
     """e.g. Emitted by VAD to indicate that a user has started speaking (i.e. is
     interruption). This is similar to UserStartedSpeakingFrame except that it

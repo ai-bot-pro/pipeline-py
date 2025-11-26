@@ -4,6 +4,7 @@ exclude = ["*_pb2.py", "*_pb2_*", "deps", "idl"]
 indent-width = 4
 line-length = 100
 
+
 [tool.ruff.format]
 exclude = ["*.pyi", "*.ipynb"]
 [tool.ruff.lint]

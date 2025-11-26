@@ -2,8 +2,12 @@ import logging
 import dataclasses
 
 import apipeline.frames.protobufs.data_frames_pb2 as frame_protos
-
 from apipeline.frames.data_frames import AudioRawFrame, Frame, TextFrame, ImageRawFrame
+from apipeline.frames.sys_frames import (
+    InterruptionFrame,
+    StartInterruptionFrame,
+    StopInterruptionFrame,
+)
 from .base_serializer import FrameSerializer
 
 
@@ -12,6 +16,9 @@ class ProtobufFrameSerializer(FrameSerializer):
         TextFrame: "text",
         AudioRawFrame: "audio",
         ImageRawFrame: "image",
+        InterruptionFrame: "interruption",
+        StartInterruptionFrame: "start_interruption",
+        StopInterruptionFrame: "stop_interruption",
     }
 
     SERIALIZABLE_FIELDS = {v: k for k, v in SERIALIZABLE_TYPES.items()}

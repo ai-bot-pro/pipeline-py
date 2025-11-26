@@ -10,7 +10,13 @@ import logging
 import time
 
 
-from apipeline.frames.sys_frames import ErrorFrame, Frame, MetricsFrame, StartInterruptionFrame
+from apipeline.frames.sys_frames import (
+    ErrorFrame,
+    Frame,
+    MetricsFrame,
+    StartInterruptionFrame,
+    InterruptionFrame,
+)
 from apipeline.frames.control_frames import StartFrame
 from apipeline.utils.obj import obj_count, obj_id
 
@@ -151,7 +157,7 @@ class FrameProcessor:
             self._enable_metrics = frame.enable_metrics
             self._enable_usage_metrics = frame.enable_usage_metrics
             self._report_only_initial_ttfb = frame.report_only_initial_ttfb
-        elif isinstance(frame, StartInterruptionFrame):
+        elif isinstance(frame, (StartInterruptionFrame, InterruptionFrame)):
             await self.stop_all_metrics()
 
     async def push_error(self, error: ErrorFrame):
