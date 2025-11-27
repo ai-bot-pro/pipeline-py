@@ -71,7 +71,7 @@ Pipeline 分为 串行，并行，并行同步
 
 <img width="1166" height="313" alt="image" src="https://github.com/user-attachments/assets/d7640a07-338d-4e5e-a12d-ba8d6c5ea3bc" />
 
-- 串行异步处理(包含异步processor)：由异步/同步 processor组成，异步processor在同步processor的基础上加入了upstream/downstream 异步队列buffer，以及对应异步处理upstream/downstream frame handler 按链式顺序执行；(如果不不需要等待下一步processor的结果，可以使用异步方式处理，直接将frame通过queue_frame的方式写入队列buffer中, 由异步processor中的handler来异步处理调用process_frame)
+- 串行异步处理(包含同步processor)：由异步/同步 processor组成，异步processor在同步processor的基础上加入了upstream/downstream 异步队列buffer，以及对应异步处理upstream/downstream frame handler 按链式顺序执行；(如果不不需要等待下一步processor的结果，可以使用异步方式处理，直接将frame通过queue_frame的方式写入队列buffer中, 由异步processor中的handler来异步处理调用process_frame)
 
 <img width="1156" height="302" alt="image" src="https://github.com/user-attachments/assets/2356f97c-d968-43be-84d0-0b1358e745c9" />
 
@@ -109,6 +109,7 @@ see [examples](https://github.com/weedge/pipeline-py/tree/main/examples)
 - The code is released under the BSD 3-Clause License.
 - The documents are licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a>
+
 
 
 
