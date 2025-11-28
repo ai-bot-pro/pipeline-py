@@ -7,17 +7,24 @@
 import asyncio
 import logging
 import signal
+from typing import Optional
 
 from apipeline.pipeline.task import PipelineTask
 from apipeline.utils.obj import obj_count, obj_id
 
 
 class PipelineRunner:
-    def __init__(self, name: str | None = None, handle_sigint: bool = True):
+    def __init__(
+        self,
+        name: str | None = None,
+        handle_sigint: bool = True,
+        loop: Optional[asyncio.AbstractEventLoop] = None,
+    ):
         self.id: int = obj_id()
         self.name: str = name or f"{self.__class__.__name__}#{obj_count(self)}"
 
         self._tasks = {}
+        self._loop = loop or asyncio.get_event_loop()
 
         if handle_sigint:
             self._setup_sigint()
@@ -25,7 +32,7 @@ class PipelineRunner:
     async def run(self, task: PipelineTask):
         logging.debug(f"Runner {self} started running {task}")
         self._tasks[task.name] = task
-        await task.run()
+        await task.run(loop=self._loop)
         del self._tasks[task.name]
         logging.debug(f"Runner {self} finished running {task}")
 

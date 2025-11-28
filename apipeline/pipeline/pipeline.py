@@ -9,6 +9,7 @@ from typing import Callable, Coroutine, List
 from apipeline.frames.base import Frame
 from apipeline.pipeline.base_pipeline import BasePipeline
 from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
+from apipeline.utils.asyncio.task_manager import BaseTaskManager
 
 
 class PipelineSource(FrameProcessor):
@@ -50,7 +51,7 @@ class Pipeline(BasePipeline):
         # downstream outside of the pipeline.
         self._source = PipelineSource(self.push_frame)
         self._sink = PipelineSink(self.push_frame)
-        self._processors: List[FrameProcessor] = [self._source] + processors + [self._sink]
+        self._processors = [self._source] + processors + [self._sink]
 
         self._link_processors()
 

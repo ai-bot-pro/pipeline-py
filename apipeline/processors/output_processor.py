@@ -40,18 +40,36 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
             self._create_sink_task()
 
     async def stop(self, frame: EndFrame):
-        # Wait for the push frame and sink tasks to finish. They will finish when
-        # the EndFrame is actually processed.
-        await self._push_frame_task
-        await self._sink_task
+        try:
+            # Wait for the push frame and sink tasks to finish. They will finish when
+            # the EndFrame is actually processed.
+            await self._push_frame_task
+            await self._sink_task
+        except asyncio.CancelledError:
+            # Here are sure the task is cancelled properly.
+            pass
+        except Exception as e:
+            logging.exception(f"{self.name}: unexpected exception while cancelling task: {e}")
+        except BaseException as e:
+            logging.critical(f"{self.name}: fatal base exception while cancelling task: {e}")
+            raise
 
     async def cancel(self, frame: CancelFrame):
-        # Cancel all the tasks and wait for them to finish.
-        self._push_frame_task.cancel()
-        await self._push_frame_task
+        try:
+            # Cancel all the tasks and wait for them to finish.
+            self._push_frame_task.cancel()
+            await self._push_frame_task
 
-        self._sink_task.cancel()
-        await self._sink_task
+            self._sink_task.cancel()
+            await self._sink_task
+        except asyncio.CancelledError:
+            # Here are sure the task is cancelled properly.
+            pass
+        except Exception as e:
+            logging.exception(f"{self.name}: unexpected exception while cancelling task: {e}")
+        except BaseException as e:
+            logging.critical(f"{self.name}: fatal base exception while cancelling task: {e}")
+            raise
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
         await super().process_frame(frame, direction)
@@ -88,9 +106,19 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         await super()._handle_interruptions(frame)
 
         if isinstance(frame, (StartInterruptionFrame, InterruptionFrame)):
-            # Stop sink task.
-            self._sink_task.cancel()
-            await self._sink_task
+            try:
+                # Stop sink task.
+                self._sink_task.cancel()
+                await self._sink_task
+            except asyncio.CancelledError:
+                # Here are sure the task is cancelled properly.
+                pass
+            except Exception as e:
+                logging.exception(f"{self.name}: unexpected exception while cancelling task: {e}")
+            except BaseException as e:
+                logging.critical(f"{self.name}: fatal base exception while cancelling task: {e}")
+                raise
+
             self._create_sink_task()
 
     #
@@ -104,9 +132,9 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
 
     async def _sink_task_handler(self):
         running = True
-        while running:
-            try:
-                frame = await asyncio.wait_for(self._sink_queue.get(), timeout=1)
+        try:
+            while running:
+                frame = await self._sink_queue.get()
                 # print(f"_sink_queue.get: {frame}")
                 # sink data frame
                 if isinstance(frame, DataFrame):
@@ -123,16 +151,13 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
                 running = not isinstance(frame, EndFrame)
 
                 self._sink_queue.task_done()
-            except asyncio.TimeoutError:
-                continue
-            except asyncio.CancelledError:
-                logging.info(f"{self} _sink_task_handler cancelled")
-                break
-            except Exception as ex:
-                logging.exception(f"{self} error processing sink queue: {ex}")
-                if self.get_event_loop().is_closed():
-                    logging.warning(f"{self.name} event loop is closed")
-                    break
+        except asyncio.CancelledError:
+            logging.info(f"{self} _sink_task_handler cancelled")
+            raise
+        except Exception as ex:
+            logging.exception(f"{self} error processing sink queue: {ex}")
+            if self.get_event_loop().is_closed():
+                logging.warning(f"{self.name} event loop is closed")
 
     @abstractmethod
     async def sink(self, frame: DataFrame):

@@ -1,15 +1,11 @@
-#
-# Copyright (c) 2024, Daily
-#
-# SPDX-License-Identifier: BSD 2-Clause License
-#
-
 import logging
 import asyncio
+from typing import Coroutine, Optional
 
 from apipeline.frames.sys_frames import Frame, StartInterruptionFrame, InterruptionFrame
 from apipeline.frames.control_frames import EndFrame
 from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
+from apipeline.utils.asyncio.task_manager import BaseTaskManager
 
 
 class AsyncFrameProcessor(FrameProcessor):
@@ -24,12 +20,12 @@ class AsyncFrameProcessor(FrameProcessor):
         super().__init__(name=name, loop=loop, **kwargs)
 
         self._push_frame_task = None
-        # Create push frame task. This is the task that will push frames in
-        # order. We also guarantee that all frames are pushed in the same task.
-        self._create_push_task()
-
-        self._is_use_upstream_task = use_upstream_task
         self._push_up_frame_task = None
+        self._is_use_upstream_task = use_upstream_task
+
+    async def setup(self, task_manager: BaseTaskManager):
+        await super().setup(task_manager)
+        self._create_push_task()
         if self._is_use_upstream_task:
             self._create_upstream_push_task()
 
@@ -40,17 +36,12 @@ class AsyncFrameProcessor(FrameProcessor):
             await self._handle_interruptions(frame)
 
     async def cleanup(self):
-        try:
-            if self._push_frame_task:
-                self._push_frame_task.cancel()
-                await self._push_frame_task
-                self._push_frame_task = None
-            if self._push_up_frame_task:
-                self._push_up_frame_task.cancel()
-                await self._push_up_frame_task
-                self._push_up_frame_task = None
-        except Exception as ex:
-            logging.exception(f"{self.name} Unexpected error in cleanup: {ex}")
+        if self._push_frame_task:
+            await self._task_manager.cancel_task(self._push_frame_task, timeout=1.0)
+            self._push_frame_task = None
+        if self._push_up_frame_task:
+            await self._task_manager.cancel_task(self._push_up_frame_task, timeout=1.0)
+            self._push_up_frame_task = None
         logging.info(f"{self.name} AsyncFrameProcessor cleanup done")
 
     #
@@ -74,19 +65,21 @@ class AsyncFrameProcessor(FrameProcessor):
     # Push frames task
     #
 
+    def create_task(self, coroutine: Coroutine, name: Optional[str] = None) -> asyncio.Task:
+        if name:
+            name = f"{self}::{name}"
+        else:
+            name = f"{self}::{coroutine.cr_code.co_name}"
+        return self._task_manager.create_task(coroutine, name)
+
     def _create_push_task(self):
-        """
-        NOTE: all async frame processors must have create a new queue and task, don't to check task is None
-        """
         self._push_queue = asyncio.Queue()
-        self._push_frame_task = self.get_event_loop().create_task(self._push_frame_task_handler())
+        self._push_frame_task = self.create_task(self._push_frame_task_handler())
         logging.info(f"{self.name} create push_frame_task")
 
     def _create_upstream_push_task(self):
         self._push_up_queue = asyncio.Queue()
-        self._push_up_frame_task = self.get_event_loop().create_task(
-            self._push_up_frame_task_handler()
-        )
+        self._push_up_frame_task = self.create_task(self._push_up_frame_task_handler())
         logging.info(f"{self.name} create push_up_frame_task")
 
     async def queue_frame(
@@ -99,38 +92,30 @@ class AsyncFrameProcessor(FrameProcessor):
 
     async def _push_frame_task_handler(self):
         running = True
-        while running:
-            try:
-                (frame, direction) = await asyncio.wait_for(self._push_queue.get(), timeout=1)
+        try:
+            while running:
+                frame, direction = await self._push_queue.get()
                 await self.push_frame(frame, direction)
                 running = not isinstance(frame, EndFrame)
-            except asyncio.TimeoutError:
-                continue
-            except asyncio.CancelledError:
-                logging.info(f"{self.name} _push_frame_task_handle cancelled")
-                break
-            except Exception as ex:
-                logging.exception(f"{self.name} Unexpected error in _push_frame_task_handler: {ex}")
-                if self.get_event_loop().is_closed():
-                    logging.warning(f"{self.name} event loop is closed")
-                    break
+        except asyncio.CancelledError:
+            logging.info(f"{self.name} _push_frame_task_handle cancelled")
+            raise
+        except Exception as ex:
+            logging.exception(f"{self.name} Unexpected error in _push_frame_task_handler: {ex}")
+            if self.get_event_loop().is_closed():
+                logging.warning(f"{self.name} event loop is closed")
 
     async def _push_up_frame_task_handler(self):
         running = True
-        while running:
-            try:
-                (frame, direction) = await asyncio.wait_for(self._push_up_queue.get(), timeout=1)
+        try:
+            while running:
+                frame, direction = await self._push_up_queue.get()
                 await self.push_frame(frame, direction)
                 running = not isinstance(frame, EndFrame)
-            except asyncio.TimeoutError:
-                continue
-            except asyncio.CancelledError:
-                logging.info(f"{self.name} _push_up_frame_task_handle cancelled")
-                break
-            except Exception as ex:
-                logging.exception(
-                    f"{self.name} Unexpected error in _push_up_frame_task_handler: {ex}"
-                )
-                if self.get_event_loop().is_closed():
-                    logging.warning(f"{self.name} event loop is closed")
-                    break
+        except asyncio.CancelledError:
+            logging.info(f"{self.name} _push_up_frame_task_handle cancelled")
+            raise
+        except Exception as ex:
+            logging.exception(f"{self.name} Unexpected error in _push_up_frame_task_handler: {ex}")
+            if self.get_event_loop().is_closed():
+                logging.warning(f"{self.name} event loop is closed")

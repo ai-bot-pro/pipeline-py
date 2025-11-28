@@ -18,6 +18,7 @@ from apipeline.frames.sys_frames import (
     InterruptionFrame,
 )
 from apipeline.frames.control_frames import StartFrame
+from apipeline.utils.asyncio.task_manager import BaseTaskManager
 from apipeline.utils.obj import obj_count, obj_id
 
 
@@ -85,6 +86,9 @@ class FrameProcessor:
         # SkipFrames
         self._skip_frames = []
 
+        # Task manager
+        self._task_manager: BaseTaskManager | None = None
+
     @property
     def interruptions_allowed(self):
         return self._allow_interruptions
@@ -100,6 +104,9 @@ class FrameProcessor:
     @property
     def report_only_initial_ttfb(self):
         return self._report_only_initial_ttfb
+
+    async def setup(self, task_manager: BaseTaskManager):
+        self._task_manager = task_manager
 
     def add_skip_frame(self, frame: Frame):
         self._skip_frames.append(frame)

@@ -56,7 +56,6 @@ class SyncParallelPipeline(BasePipeline):
 
         self._sinks = []
         self._sources = []
-        self._pipelines = []
 
         self._up_queue = asyncio.Queue()
         self._down_queue = asyncio.Queue()

@@ -24,6 +24,8 @@ async def main():
     runner = PipelineRunner()
     await runner.run(task)
 
-
+"""
+python examples/sentence_aggregator.py
+"""
 if __name__ == "__main__":
     asyncio.run(main())

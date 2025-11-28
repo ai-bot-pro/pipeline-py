@@ -6,7 +6,7 @@
 
 import asyncio
 import logging
-from typing import AsyncIterable, Iterable
+from typing import AsyncIterable, Iterable, Optional
 
 from pydantic import BaseModel
 
@@ -22,6 +22,7 @@ from apipeline.frames.sys_frames import (
 from apipeline.frames.control_frames import EndFrame, StartFrame
 from apipeline.pipeline.base_pipeline import BasePipeline
 from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
+from apipeline.utils.asyncio.task_manager import BaseTaskManager, TaskManager, TaskManagerParams
 from apipeline.utils.obj import obj_count, obj_id
 
 
@@ -63,12 +64,18 @@ class Source(FrameProcessor):
 
 
 class PipelineTask:
-    def __init__(self, pipeline: BasePipeline, params: PipelineParams = PipelineParams()):
+    def __init__(
+        self,
+        pipeline: BasePipeline,
+        params: PipelineParams = None,
+        task_manager: Optional[BaseTaskManager] = None,
+    ):
         self.id: int = obj_id()
         self.name: str = f"{self.__class__.__name__}#{obj_count(self)}"
 
         self._pipeline = pipeline
-        self._params = params
+        self._params = params or PipelineParams()
+        self._task_manager = task_manager or TaskManager()
         self._finished = False
 
         self._down_queue = asyncio.Queue()
@@ -95,11 +102,18 @@ class PipelineTask:
         await self._process_down_task
         await self._process_up_task
 
-    async def run(self):
+    async def run(self, loop: asyncio.AbstractEventLoop):
+        await self._setup(loop)
         self._process_up_task = asyncio.create_task(self._process_up_queue())
         self._process_down_task = asyncio.create_task(self._process_down_queue())
         await asyncio.gather(self._process_up_task, self._process_down_task)
         self._finished = True
+
+    async def _setup(self, loop: asyncio.AbstractEventLoop):
+        """Set up the pipeline task and all processors."""
+        self._task_manager.setup(TaskManagerParams(loop=loop))
+
+        await self._pipeline.setup(self._task_manager)
 
     async def queue_frame(self, frame: Frame):
         await self._down_queue.put(frame)
