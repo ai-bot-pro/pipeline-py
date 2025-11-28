@@ -44,12 +44,16 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
     async def stop(self, frame: EndFrame):
         # Wait for the push frame and sink tasks to finish. They will finish when
         # the EndFrame is actually processed.
-        await self._task_manager.cancel_task(self._push_frame_task, timeout=1.0, is_cancel=False)
-        if self._is_use_upstream_task:
+        if self._push_frame_task:
+            await self._task_manager.cancel_task(
+                self._push_frame_task, timeout=1.0, is_cancel=False
+            )
+        if self._is_use_upstream_task and self._push_up_frame_task:
             await self._task_manager.cancel_task(
                 self._push_up_frame_task, timeout=1.0, is_cancel=False
             )
-        await self._task_manager.cancel_task(self._sink_task, timeout=1.0, is_cancel=False)
+        if self._sink_task:
+            await self._task_manager.cancel_task(self._sink_task, timeout=1.0, is_cancel=False)
 
     async def cancel(self, frame: CancelFrame):
         if self._sink_task:

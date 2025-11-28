@@ -27,8 +27,11 @@ class TestProtobufFrameSerializer(unittest.IsolatedAsyncioTestCase):
 
     async def test_system_frame(self):
         sys_frame = InterruptionFrame()
-        frame = self.serializer.deserialize(self.serializer.serialize(sys_frame))
+        sys_frame_bytes = self.serializer.serialize(sys_frame)
+        print(sys_frame_bytes)
+        frame = self.serializer.deserialize(sys_frame_bytes)
         print(frame)
+        # self.assertEqual(sys_frame_bytes, assert_sys_frame_bytes)
         self.assertEqual(frame, sys_frame)
 
         sys_frame = StartInterruptionFrame()
