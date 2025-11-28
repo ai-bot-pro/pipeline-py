@@ -73,7 +73,9 @@ class BaseTaskManager(ABC):
         pass
 
     @abstractmethod
-    async def cancel_task(self, task: asyncio.Task, timeout: Optional[float] = None):
+    async def cancel_task(
+        self, task: asyncio.Task, timeout: Optional[float] = None, is_cancel: bool = True
+    ):
         """Cancels the given asyncio Task and awaits its completion with an optional timeout.
 
         This function removes the task from the set of registered tasks upon
@@ -177,7 +179,9 @@ class TaskManager(BaseTaskManager):
         logging.info(f"{name}: task created")
         return task
 
-    async def cancel_task(self, task: asyncio.Task, timeout: Optional[float] = None):
+    async def cancel_task(
+        self, task: asyncio.Task, timeout: Optional[float] = None, is_cancel: bool = True
+    ):
         """Cancels the given asyncio Task and awaits its completion with an optional timeout.
 
         This function removes the task from the set of registered tasks upon
@@ -188,7 +192,8 @@ class TaskManager(BaseTaskManager):
             timeout: The optional timeout in seconds to wait for the task to cancel.
         """
         name = task.get_name()
-        task.cancel()
+        if is_cancel:
+            task.cancel()
         try:
             if timeout:
                 await asyncio.wait_for(task, timeout=timeout)

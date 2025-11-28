@@ -14,6 +14,7 @@ from apipeline.frames.sys_frames import (
 from apipeline.frames.control_frames import ControlFrame, EndFrame, StartFrame
 from apipeline.processors.async_frame_processor import AsyncFrameProcessor
 from apipeline.processors.frame_processor import FrameDirection
+from apipeline.utils.asyncio.task_manager import BaseTaskManager
 
 
 class OutputProcessor(AsyncFrameProcessor, ABC):
@@ -30,46 +31,30 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         self._stopped_event = asyncio.Event()
         self._sink_event = asyncio.Event()
 
-        # Create sink frame task. This is the task that will actually write
-        # audio or video frames. We write audio/video in a task so we can keep
-        # generating frames upstream while, for example, the audio is playing.
+        self._sink_task = None
+
+    async def setup(self, task_manager: BaseTaskManager):
+        await super().setup(task_manager)
         self._create_sink_task()
 
     async def start(self, frame: StartFrame):
-        if self._sink_task.cancelled():
+        if self._sink_task is None or self._sink_task.cancelled():
             self._create_sink_task()
 
     async def stop(self, frame: EndFrame):
-        try:
-            # Wait for the push frame and sink tasks to finish. They will finish when
-            # the EndFrame is actually processed.
-            await self._push_frame_task
-            await self._sink_task
-        except asyncio.CancelledError:
-            # Here are sure the task is cancelled properly.
-            pass
-        except Exception as e:
-            logging.exception(f"{self.name}: unexpected exception while cancelling task: {e}")
-        except BaseException as e:
-            logging.critical(f"{self.name}: fatal base exception while cancelling task: {e}")
-            raise
+        # Wait for the push frame and sink tasks to finish. They will finish when
+        # the EndFrame is actually processed.
+        await self._task_manager.cancel_task(self._push_frame_task, timeout=1.0, is_cancel=False)
+        if self._is_use_upstream_task:
+            await self._task_manager.cancel_task(
+                self._push_up_frame_task, timeout=1.0, is_cancel=False
+            )
+        await self._task_manager.cancel_task(self._sink_task, timeout=1.0, is_cancel=False)
 
     async def cancel(self, frame: CancelFrame):
-        try:
-            # Cancel all the tasks and wait for them to finish.
-            self._push_frame_task.cancel()
-            await self._push_frame_task
-
-            self._sink_task.cancel()
-            await self._sink_task
-        except asyncio.CancelledError:
-            # Here are sure the task is cancelled properly.
-            pass
-        except Exception as e:
-            logging.exception(f"{self.name}: unexpected exception while cancelling task: {e}")
-        except BaseException as e:
-            logging.critical(f"{self.name}: fatal base exception while cancelling task: {e}")
-            raise
+        if self._sink_task:
+            await self._task_manager.cancel_task(self._sink_task, timeout=1.0)
+            self._sink_task = None
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
         await super().process_frame(frame, direction)
@@ -88,8 +73,8 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
             await self.push_frame(frame, direction)
         # Control frames.
         elif isinstance(frame, StartFrame):
-            await self._sink_queue.put(frame)
             await self.start(frame)
+            await self._sink_queue.put(frame)
         elif isinstance(frame, EndFrame):
             await self._sink_queue.put(frame)
             await self.stop(frame)
@@ -106,19 +91,8 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
         await super()._handle_interruptions(frame)
 
         if isinstance(frame, (StartInterruptionFrame, InterruptionFrame)):
-            try:
-                # Stop sink task.
-                self._sink_task.cancel()
-                await self._sink_task
-            except asyncio.CancelledError:
-                # Here are sure the task is cancelled properly.
-                pass
-            except Exception as e:
-                logging.exception(f"{self.name}: unexpected exception while cancelling task: {e}")
-            except BaseException as e:
-                logging.critical(f"{self.name}: fatal base exception while cancelling task: {e}")
-                raise
-
+            if self._sink_task:
+                await self._task_manager.cancel_task(self._sink_task, timeout=1.0)
             self._create_sink_task()
 
     #
@@ -126,38 +100,32 @@ class OutputProcessor(AsyncFrameProcessor, ABC):
     #
 
     def _create_sink_task(self):
-        loop = self.get_event_loop()
+        # Create sink frame task. This is the task that will actually write
+        # audio or video frames. We write audio/video in a task so we can keep
+        # generating frames upstream while, for example, the audio is playing.
         self._sink_queue = asyncio.Queue()
-        self._sink_task = loop.create_task(self._sink_task_handler())
+        self._sink_task = self.create_task(self._sink_task_handler())
 
     async def _sink_task_handler(self):
         running = True
-        try:
-            while running:
-                frame = await self._sink_queue.get()
-                # print(f"_sink_queue.get: {frame}")
-                # sink data frame
-                if isinstance(frame, DataFrame):
-                    await self.sink(frame)
-                    # subclass need wait sink task done
-                    await self._sink_event.wait()
-                    self._sink_event.clear()
-                # sink control frame
-                elif isinstance(frame, ControlFrame):
-                    await self.sink_control_frame(frame)
-                else:
-                    await self.queue_frame(frame)
+        while running:
+            frame = await self._sink_queue.get()
+            # print(f"_sink_queue.get: {frame}")
+            # sink data frame
+            if isinstance(frame, DataFrame):
+                await self.sink(frame)
+                # subclass need wait sink task done
+                await self._sink_event.wait()
+                self._sink_event.clear()
+            # sink control frame
+            elif isinstance(frame, ControlFrame):
+                await self.sink_control_frame(frame)
+            else:
+                await self.queue_frame(frame)
 
-                running = not isinstance(frame, EndFrame)
+            running = not isinstance(frame, EndFrame)
 
-                self._sink_queue.task_done()
-        except asyncio.CancelledError:
-            logging.info(f"{self} _sink_task_handler cancelled")
-            raise
-        except Exception as ex:
-            logging.exception(f"{self} error processing sink queue: {ex}")
-            if self.get_event_loop().is_closed():
-                logging.warning(f"{self.name} event loop is closed")
+            self._sink_queue.task_done()
 
     @abstractmethod
     async def sink(self, frame: DataFrame):

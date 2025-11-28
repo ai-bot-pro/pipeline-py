@@ -1,13 +1,8 @@
-#
-# Copyright (c) 2024, Daily
-#
-# SPDX-License-Identifier: BSD 2-Clause License
-#
-
 from typing import Callable, List, Tuple
 import logging
 
 from apipeline.frames.sys_frames import Frame, SystemFrame
+from apipeline.frames.control_frames import ControlFrame
 from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 
 
@@ -34,8 +29,8 @@ class GatedAggregator(FrameProcessor):
     async def process_frame(self, frame: Frame, direction: FrameDirection):
         await super().process_frame(frame, direction)
 
-        # We must not block system frames.
-        if isinstance(frame, SystemFrame):
+        # We must not block system/control frames.
+        if isinstance(frame, (SystemFrame, ControlFrame)):
             await self.push_frame(frame, direction)
             return
 
