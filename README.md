@@ -32,7 +32,8 @@ see [docs/design.md](https://github.com/weedge/pipeline-py/tree/main/docs/design
 - CancelFrame: 系统退出指令，用于系统接受退出信号，清理退出系统
 - ErrorFrame: 系统运行时错误指令
 - StopTaskFrame: 停止任务指令
-- StartInterruptionFrame: 中断指令，对于异步processor进行中断，直接切断异步buffer重启queue_frame; 如果有些模型内化了终端指令，发送给底层模型触发模型中断操作，或者停止流式输出
+- InterruptionTaskFrame: 终端任务指令，source 收到InterruptionTaskFrame 发送InterruptionFrame，用于语音文本流中断
+- StartInterruptionFrame/InterruptionFrame: 中断指令，对于异步processor进行中断，直接切断异步buffer重启queue_frame; 如果有些模型内化了终端指令，发送给底层模型触发模型中断操作，或者停止流式输出
 - StopInterruptionFrame: 停止中断指令
 - MetricsFrame: 系统监控指标 (processor 运行时长; first token/chunk/byte time)
 
@@ -109,6 +110,7 @@ see [examples](https://github.com/weedge/pipeline-py/tree/main/examples)
 - The code is released under the BSD 3-Clause License.
 - The documents are licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a>
+
 
 
 
