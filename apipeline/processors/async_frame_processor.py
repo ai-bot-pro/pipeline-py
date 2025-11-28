@@ -167,14 +167,14 @@ class AsyncFrameProcessorQueue(asyncio.PriorityQueue):
             self.__low_counter += 1
             await super().put((self.LOW_PRIORITY, self.__low_counter, item))
 
-    async def get(self) -> Any:
+    async def get(self) -> Tuple[Frame, FrameDirection]:
         """Retrieve the next item from the queue.
 
-        System frames are prioritized. If both queues are empty, this method
-        waits until an item is available.
+        This method retrieves the highest-priority item from the queue. If the
+        queue is empty, it waits until an item is available.
 
         Returns:
-            Any: The next item from the system or main queue.
+            Tuple[Frame, FrameDirection]: The next item from the queue.
 
         """
         _, _, item = await super().get()
