@@ -1,6 +1,6 @@
 import logging
 import asyncio
-from typing import Any, Awaitable, Callable, Coroutine, Optional, Tuple
+from typing import Any, Coroutine, Optional, Tuple
 
 from apipeline.frames.sys_frames import (
     Frame,
@@ -44,6 +44,9 @@ class AsyncFrameProcessor(FrameProcessor):
             await self._handle_interruptions(frame)
 
     async def cleanup(self):
+        await self._cleanup()
+
+    async def _cleanup(self):
         if self._push_frame_task:
             await self._task_manager.cancel_task(self._push_frame_task, timeout=1.0)
             self._push_frame_task = None
@@ -60,7 +63,7 @@ class AsyncFrameProcessor(FrameProcessor):
         NOTE: push interruptions frame, don't push again
         """
         try:
-            await self.cleanup()
+            await self._cleanup()
             # Push an out-of-band frame (i.e. not using the ordered push frame task).
             await self.push_frame(frame)
 
