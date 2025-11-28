@@ -148,12 +148,12 @@ class AsyncFrameProcessorQueue(asyncio.PriorityQueue):
     async def put(self, item: Tuple[Frame, FrameDirection]):
         """Put an item into the priority queue.
 
-        System frames (`SystemFrame`) have higher priority than any other
-        frames. If a non-frame item (e.g. a watchdog cancellation sentinel) is
-        provided it will have the highest priority.
+        System frames (`SystemFrame`) have the highest priority, followed by
+        control frames (`ControlFrame`), and then all other frames. Items with
+        the same priority are processed in FIFO order.
 
         Args:
-            item (Any): The item to enqueue.
+            item (Tuple[Frame, FrameDirection]): The item to enqueue, consisting of a frame and its direction.
 
         """
         frame, _ = item
