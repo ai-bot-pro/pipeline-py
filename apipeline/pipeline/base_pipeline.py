@@ -20,10 +20,10 @@ class BasePipeline(FrameProcessor):
 
     async def setup(self, task_manager: BaseTaskManager):
         await super().setup(task_manager)
-        await self.setup_porcessors(task_manager)
+        await self.setup_processors(task_manager)
         await self.setup_pipelines(task_manager)
 
-    async def setup_porcessors(self, task_manager: BaseTaskManager):
+    async def setup_processors(self, task_manager: BaseTaskManager):
         for p in self._processors:
             await p.setup(task_manager)
 

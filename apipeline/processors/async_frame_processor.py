@@ -2,7 +2,7 @@ import logging
 import asyncio
 from typing import Coroutine, Optional
 
-from apipeline.frames.sys_frames import Frame, StartInterruptionFrame, InterruptionFrame
+from apipeline.frames.sys_frames import ErrorFrame, Frame, StartInterruptionFrame, InterruptionFrame
 from apipeline.frames.control_frames import EndFrame
 from apipeline.processors.frame_processor import FrameDirection, FrameProcessor
 from apipeline.utils.asyncio.task_manager import BaseTaskManager
@@ -51,15 +51,19 @@ class AsyncFrameProcessor(FrameProcessor):
         """
         NOTE: push interruptions frame, don't push again
         """
-        await self.cleanup()
-        # Push an out-of-band frame (i.e. not using the ordered push
-        # frame task).
-        await self.push_frame(frame)
+        try:
+            await self.cleanup()
+            # Push an out-of-band frame (i.e. not using the ordered push
+            # frame task).
+            await self.push_frame(frame)
 
-        # Create a new queue and task.
-        self._create_push_task()
-        if self._is_use_upstream_task:
-            self._create_upstream_push_task()
+            # Create a new queue and task.
+            self._create_push_task()
+            if self._is_use_upstream_task:
+                self._create_upstream_push_task()
+        except Exception as e:
+            logging.exception(f"Uncaught exception in {self} when handle_interruptions: {e}")
+            await self.push_error(ErrorFrame(str(e)))
 
     #
     # Push frames task
@@ -92,30 +96,16 @@ class AsyncFrameProcessor(FrameProcessor):
 
     async def _push_frame_task_handler(self):
         running = True
-        try:
-            while running:
-                frame, direction = await self._push_queue.get()
-                await self.push_frame(frame, direction)
-                running = not isinstance(frame, EndFrame)
-        except asyncio.CancelledError:
-            logging.info(f"{self.name} _push_frame_task_handle cancelled")
-            raise
-        except Exception as ex:
-            logging.exception(f"{self.name} Unexpected error in _push_frame_task_handler: {ex}")
-            if self.get_event_loop().is_closed():
-                logging.warning(f"{self.name} event loop is closed")
+        while running:
+            frame, direction = await self._push_queue.get()
+            await self.push_frame(frame, direction)
+            running = not isinstance(frame, EndFrame)
+            self._push_queue.task_done()
 
     async def _push_up_frame_task_handler(self):
         running = True
-        try:
-            while running:
-                frame, direction = await self._push_up_queue.get()
-                await self.push_frame(frame, direction)
-                running = not isinstance(frame, EndFrame)
-        except asyncio.CancelledError:
-            logging.info(f"{self.name} _push_up_frame_task_handle cancelled")
-            raise
-        except Exception as ex:
-            logging.exception(f"{self.name} Unexpected error in _push_up_frame_task_handler: {ex}")
-            if self.get_event_loop().is_closed():
-                logging.warning(f"{self.name} event loop is closed")
+        while running:
+            frame, direction = await self._push_up_queue.get()
+            await self.push_frame(frame, direction)
+            running = not isinstance(frame, EndFrame)
+            self._push_up_queue.task_done()
