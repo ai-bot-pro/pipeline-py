@@ -11,10 +11,8 @@ from apipeline.pipeline.runner import PipelineRunner
 from apipeline.pipeline.sync_parallel_pipeline import SyncParallelPipeline
 from apipeline.pipeline.task import PipelineParams, PipelineTask
 from apipeline.processors.aggregators.sentence import SentenceAggregator
-from apipeline.processors.frame_processor import FrameProcessor
 from apipeline.processors.logger import FrameLogger
 from apipeline.processors.text_transformer import StatelessTextTransformer
-from apipeline.processors.input_processor import InputFrameProcessor
 from apipeline.processors.output_processor import OutputFrameProcessor
 
 
